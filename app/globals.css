@@ -1,9 +1,10 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 :root {
-  --background: #F6EEDF;
+  --background: #F5EAD7;
   --foreground: #102238;
-  --brand-cream: #F6EEDF;
+  --brand-cream: #F5EAD7;
   --brand-blue: #1E487A;
   --brand-vermillion: #EA401C;
   --brand-navy: #102238;
@@ -28,4 +29,20 @@ body {
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display), system-ui, sans-serif;
+}
+
+/* Brief article styling: brand-coloured links, navy headings in display font. */
+.prose {
+  --tw-prose-body: var(--brand-navy);
+  --tw-prose-headings: var(--brand-navy);
+  --tw-prose-bold: var(--brand-navy);
+  --tw-prose-bullets: var(--brand-blue);
+  --tw-prose-links: var(--brand-blue);
+}
+.prose a {
+  text-decoration-color: color-mix(in srgb, var(--brand-blue) 40%, transparent);
+  text-underline-offset: 2px;
+}
+.prose a:hover {
+  color: var(--brand-vermillion);
 }

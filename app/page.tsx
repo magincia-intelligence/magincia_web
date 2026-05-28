@@ -18,6 +18,15 @@ export default function Home() {
         />
       </section>
 
+      <section className="w-full flex flex-col items-center px-6 pt-6 text-center">
+        <p className="max-w-2xl text-lg sm:text-xl text-navy/80">
+          AI-powered market intelligence for the Australian education sector
+        </p>
+        <span className="mt-4 inline-flex items-center rounded-full bg-vermillion px-3 py-1 text-xs font-semibold uppercase tracking-widest text-cream">
+          Beta
+        </span>
+      </section>
+
       <section className="w-full max-w-3xl px-6 py-12 sm:py-16">
         <h2 className="text-2xl sm:text-3xl font-semibold text-navy">
           Daily Briefs

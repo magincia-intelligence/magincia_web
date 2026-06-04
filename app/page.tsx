@@ -20,9 +20,9 @@ export default function Home() {
       </section>
 
       <section className="w-full flex flex-col items-center px-6 pt-6 text-center">
-        <p className="max-w-2xl text-lg sm:text-xl text-navy/80">
-          AI-powered market intelligence for the Australian education sector
-        </p>
+        <h1 className="max-w-2xl text-lg sm:text-xl text-navy/80 font-normal">
+          AI-powered intelligence on Australian education and international education in Australia
+        </h1>
         <span className="mt-4 inline-flex items-center rounded-full bg-vermillion px-3 py-1 text-xs font-semibold uppercase tracking-widest text-cream">
           Beta
         </span>
@@ -34,7 +34,7 @@ export default function Home() {
           Daily Briefs
         </h2>
         <p className="mt-1 text-sm text-navy/60">
-          Australian education — published each business day.
+          Policy, funding, and regulation across Australian higher education, international students, VET, ELICOS, schools, and ECEC — published each business day.
         </p>
 
         {briefs.length === 0 ? (

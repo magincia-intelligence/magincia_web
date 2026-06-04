@@ -14,35 +14,57 @@ const hankenGrotesk = Hanken_Grotesk({
   display: "swap",
 });
 
+const SITE_NAME = "Magincia Intelligence";
+const SITE_TAGLINE =
+  "Daily briefings on Australian education and international education in Australia — higher ed, VET, ELICOS, schools, and ECEC policy, funding, and regulation.";
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://magincia.ai"),
-  title: "Magincia Intelligence — Insight. Clarity. Advantage.",
-  description:
-    "Education market intelligence that gives you the insight, clarity, and advantage to make better decisions.",
+  title: {
+    default:
+      "Magincia Intelligence — Daily Australian Education Brief",
+    template: "%s — Magincia Intelligence",
+  },
+  description: SITE_TAGLINE,
+  applicationName: SITE_NAME,
+  keywords: [
+    "Australian education",
+    "international education in Australia",
+    "Australian higher education",
+    "international students Australia",
+    "Australia education policy",
+    "ATEC",
+    "TEQSA",
+    "ASQA",
+    "ELICOS",
+    "Australian VET",
+    "Australian universities",
+    "education market intelligence",
+  ],
+  authors: [{ name: SITE_NAME }],
   alternates: {
     canonical: "/",
   },
   openGraph: {
     type: "website",
-    siteName: "Magincia Intelligence",
-    title: "Magincia Intelligence — Insight. Clarity. Advantage.",
-    description:
-      "Education market intelligence that gives you the insight, clarity, and advantage to make better decisions.",
+    siteName: SITE_NAME,
+    title: "Magincia Intelligence — Daily Australian Education Brief",
+    description: SITE_TAGLINE,
     url: "https://magincia.ai",
+    locale: "en_AU",
     images: [
       {
         url: "/magincia_banner.png",
         width: 1983,
         height: 793,
-        alt: "Magincia Intelligence",
+        alt: "Magincia Intelligence — Australian Education Market Intelligence",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Magincia Intelligence — Insight. Clarity. Advantage.",
-    description:
-      "Education market intelligence that gives you the insight, clarity, and advantage to make better decisions.",
+    title: "Magincia Intelligence — Daily Australian Education Brief",
+    description: SITE_TAGLINE,
     images: ["/magincia_banner.png"],
   },
 };
@@ -58,6 +80,40 @@ export default function RootLayout({
       className={`${outfit.variable} ${hankenGrotesk.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify([
+              {
+                "@context": "https://schema.org",
+                "@type": "Organization",
+                name: SITE_NAME,
+                url: "https://magincia.ai",
+                logo: "https://magincia.ai/magincia_logo.png",
+                description: SITE_TAGLINE,
+                areaServed: "AU",
+                knowsAbout: [
+                  "Australian education",
+                  "International education in Australia",
+                  "Australian higher education policy",
+                  "Australian Tertiary Education Commission (ATEC)",
+                  "TEQSA",
+                  "ASQA",
+                  "ELICOS",
+                  "Australian VET",
+                ],
+              },
+              {
+                "@context": "https://schema.org",
+                "@type": "WebSite",
+                name: SITE_NAME,
+                url: "https://magincia.ai",
+                inLanguage: "en-AU",
+                publisher: { "@type": "Organization", name: SITE_NAME },
+              },
+            ]),
+          }}
+        />
         <div className="flex flex-1 flex-col">{children}</div>
         <footer className="w-full border-t border-navy/10 bg-cream px-6 py-10 text-xs leading-relaxed text-navy/55">
           <div className="mx-auto max-w-3xl space-y-3">

@@ -28,6 +28,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "daily",
       priority: 0.4,
     },
+    {
+      url: `${SITE}/intelligence`,
+      lastModified: today,
+      changeFrequency: "monthly",
+      priority: 0.6,
+    },
     ...months.map((m) => ({
       url: `${SITE}/archive/${m.month}`,
       lastModified: m.briefs[0]?.date ?? today,

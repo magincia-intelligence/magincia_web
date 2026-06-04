@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { formatLongDate, getAllBriefs } from "@/lib/briefs";
+import SubscribeForm from "./components/SubscribeForm";
 
 export default function Home() {
   const briefs = getAllBriefs();
@@ -25,6 +26,7 @@ export default function Home() {
         <span className="mt-4 inline-flex items-center rounded-full bg-vermillion px-3 py-1 text-xs font-semibold uppercase tracking-widest text-cream">
           Beta
         </span>
+        <SubscribeForm />
       </section>
 
       <section className="w-full max-w-3xl px-6 py-12 sm:py-16">

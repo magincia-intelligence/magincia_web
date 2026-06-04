@@ -16,6 +16,57 @@ const mdComponents = {
   ),
 };
 
+function escapeRegExp(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+// rehype plugin: wrap matches of `terms` in <mark> within the rendered
+// markdown tree, so highlighting survives bold text and links.
+function highlightPlugin(terms: string[]) {
+  const cleaned = terms.map((t) => t.trim()).filter(Boolean).map(escapeRegExp);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return () => (tree: any) => {
+    if (!cleaned.length) return;
+    const re = new RegExp(`(${cleaned.join("|")})`, "gi");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const walk = (node: any) => {
+      if (!node.children) return;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const out: any[] = [];
+      for (const child of node.children) {
+        if (child.type === "text") {
+          const parts = String(child.value).split(re);
+          if (parts.length === 1) {
+            out.push(child);
+            continue;
+          }
+          // With one capture group, odd indices are the matched fragments.
+          parts.forEach((part: string, idx: number) => {
+            if (part === "") return;
+            if (idx % 2 === 1) {
+              out.push({
+                type: "element",
+                tagName: "mark",
+                properties: {
+                  className: ["!bg-amber-200", "!text-navy", "rounded-sm", "px-0.5"],
+                },
+                children: [{ type: "text", value: part }],
+              });
+            } else {
+              out.push({ type: "text", value: part });
+            }
+          });
+        } else {
+          if (child.children) walk(child);
+          out.push(child);
+        }
+      }
+      node.children = out;
+    };
+    walk(tree);
+  };
+}
+
 function TagChip({
   tag,
   active,
@@ -55,8 +106,18 @@ export default function SearchClient({
   const toggle = (t: string) =>
     setActive((a) => (a.includes(t) ? a.filter((x) => x !== t) : [...a, t]));
 
+  const terms = useMemo(
+    () => query.toLowerCase().split(/\s+/).filter(Boolean),
+    [query],
+  );
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const rehypePlugins = useMemo<any[]>(
+    () => (terms.length ? [highlightPlugin(terms)] : []),
+    [terms],
+  );
+
   const results = useMemo(() => {
-    const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
     return stories.filter((s) => {
       // OR across tags
       if (active.length && !s.tags.some((t) => active.includes(t))) return false;
@@ -67,7 +128,7 @@ export default function SearchClient({
       }
       return true;
     });
-  }, [stories, query, active]);
+  }, [stories, terms, active]);
 
   const hasFilter = query.trim().length > 0 || active.length > 0;
 
@@ -133,7 +194,11 @@ export default function SearchClient({
               )}
             </div>
             <div className="prose prose-lg max-w-none prose-p:my-0 mt-2">
-              <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                rehypePlugins={rehypePlugins}
+                components={mdComponents}
+              >
                 {s.md}
               </ReactMarkdown>
             </div>

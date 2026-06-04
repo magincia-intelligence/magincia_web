@@ -31,7 +31,6 @@ export default function Home() {
         <span className="mt-4 inline-flex items-center rounded-full bg-vermillion px-3 py-1 text-xs font-semibold uppercase tracking-widest text-cream">
           Beta
         </span>
-        <SubscribeForm />
         <SearchBox />
       </section>
 
@@ -87,6 +86,16 @@ export default function Home() {
             </Link>
           </div>
         )}
+      </section>
+
+      <section className="w-full flex flex-col items-center border-t border-navy/10 px-6 py-12 sm:py-16 text-center">
+        <h2 className="text-2xl sm:text-3xl font-semibold text-navy">
+          Subscribe to the Daily Brief
+        </h2>
+        <p className="mt-1 max-w-xl text-sm text-navy/60">
+          Australian education intelligence — policy, funding, and regulation — delivered each business day.
+        </p>
+        <SubscribeForm />
       </section>
     </div>
   );

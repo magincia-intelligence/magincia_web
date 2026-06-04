@@ -15,9 +15,36 @@ const hankenGrotesk = Hanken_Grotesk({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://magincia.ai"),
   title: "Magincia Intelligence — Insight. Clarity. Advantage.",
   description:
     "Education market intelligence that gives you the insight, clarity, and advantage to make better decisions.",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    siteName: "Magincia Intelligence",
+    title: "Magincia Intelligence — Insight. Clarity. Advantage.",
+    description:
+      "Education market intelligence that gives you the insight, clarity, and advantage to make better decisions.",
+    url: "https://magincia.ai",
+    images: [
+      {
+        url: "/magincia_banner.png",
+        width: 1983,
+        height: 793,
+        alt: "Magincia Intelligence",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Magincia Intelligence — Insight. Clarity. Advantage.",
+    description:
+      "Education market intelligence that gives you the insight, clarity, and advantage to make better decisions.",
+    images: ["/magincia_banner.png"],
+  },
 };
 
 export default function RootLayout({

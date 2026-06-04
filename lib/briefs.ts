@@ -9,6 +9,7 @@ export interface BriefMeta {
   weekday: string; // e.g. "Thursday"
   time: string; // e.g. "09:34 AEST"
   title: string;
+  summary: string; // 1-2 sentence lead, shown on the homepage
 }
 
 export interface Brief {
@@ -26,6 +27,7 @@ function readBrief(date: string): Brief | null {
       weekday: String(data.weekday ?? ""),
       time: String(data.time ?? ""),
       title: String(data.title ?? "Daily Brief — Australian Education"),
+      summary: String(data.summary ?? ""),
     },
     body: content.trim(),
   };

@@ -43,15 +43,25 @@ export default function Home() {
               <li key={b.date} className="border-b border-navy/10">
                 <Link
                   href={`/briefs/${b.date}`}
-                  className="group flex items-baseline justify-between gap-4 py-4"
+                  className="group block py-5"
                 >
-                  <span className="font-medium text-navy transition-colors group-hover:text-vermillion">
-                    {[b.weekday, formatLongDate(b.date)]
-                      .filter(Boolean)
-                      .join(", ")}
-                  </span>
-                  <span className="shrink-0 text-sm text-navy/50">
-                    {b.time}
+                  <div className="flex items-baseline justify-between gap-4">
+                    <span className="font-semibold text-navy transition-colors group-hover:text-vermillion">
+                      {[b.weekday, formatLongDate(b.date)]
+                        .filter(Boolean)
+                        .join(", ")}
+                    </span>
+                    <span className="shrink-0 text-sm text-navy/50">
+                      {b.time}
+                    </span>
+                  </div>
+                  {b.summary && (
+                    <p className="mt-2 text-navy/75 leading-snug">
+                      {b.summary}
+                    </p>
+                  )}
+                  <span className="mt-2 inline-block text-sm font-medium text-blue transition-colors group-hover:text-vermillion">
+                    Read more →
                   </span>
                 </Link>
               </li>

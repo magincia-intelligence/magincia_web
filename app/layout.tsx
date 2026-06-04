@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Outfit, Hanken_Grotesk } from "next/font/google";
 import "./globals.css";
+import SiteHeader from "./components/SiteHeader";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -114,6 +115,7 @@ export default function RootLayout({
             ]),
           }}
         />
+        <SiteHeader />
         <div className="flex flex-1 flex-col">{children}</div>
         <footer className="w-full border-t border-navy/10 bg-cream px-6 py-10 text-xs leading-relaxed text-navy/55">
           <div className="mx-auto max-w-3xl space-y-3">

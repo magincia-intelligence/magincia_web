@@ -1,6 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
 import matter from "gray-matter";
+import { formatLongDate, formatMonthLabel } from "./format";
+
+export { formatLongDate, formatMonthLabel } from "./format";
 
 const BRIEFS_DIR = path.join(process.cwd(), "content", "briefs");
 
@@ -46,22 +49,6 @@ export function getAllBriefs(): BriefMeta[] {
 
 export function getBrief(date: string): Brief | null {
   return readBrief(date);
-}
-
-const MONTHS = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
-];
-
-export function formatLongDate(iso: string): string {
-  const [y, m, d] = iso.split("-").map(Number);
-  return `${d} ${MONTHS[m - 1]} ${y}`;
-}
-
-export function formatMonthLabel(month: string): string {
-  // month is "YYYY-MM"
-  const [y, m] = month.split("-").map(Number);
-  return `${MONTHS[m - 1]} ${y}`;
 }
 
 export interface BriefMonth {
@@ -200,5 +187,51 @@ export function parseBrief(body: string): BriefSection[] {
 export function briefTags(sections: BriefSection[]): StoryTag[] {
   const present = new Set<string>();
   for (const s of sections) for (const b of s.blocks) for (const t of b.tags) present.add(t);
+  return STORY_TAG_ORDER.filter((t) => present.has(t));
+}
+
+// ---- Search index -----------------------------------------------------------
+export interface StoryRecord {
+  date: string; // brief date the story belongs to
+  weekday: string;
+  heading: string | null; // section heading
+  md: string; // story markdown (for display)
+  text: string; // plain text (for searching)
+  tags: StoryTag[];
+}
+
+function stripMarkdown(md: string): string {
+  return md
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1") // [label](url) -> label
+    .replace(/[*_`#>]/g, "") // strip emphasis / heading / quote marks
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+// Flatten every brief into individual story records, newest brief first.
+export function getAllStories(): StoryRecord[] {
+  const stories: StoryRecord[] = [];
+  for (const meta of getAllBriefs()) {
+    const brief = getBrief(meta.date);
+    if (!brief) continue;
+    for (const section of parseBrief(brief.body)) {
+      for (const block of section.blocks) {
+        stories.push({
+          date: meta.date,
+          weekday: meta.weekday,
+          heading: section.heading,
+          md: block.md,
+          text: stripMarkdown(block.md),
+          tags: block.tags,
+        });
+      }
+    }
+  }
+  return stories;
+}
+
+export function storyTags(stories: StoryRecord[]): StoryTag[] {
+  const present = new Set<string>();
+  for (const s of stories) for (const t of s.tags) present.add(t);
   return STORY_TAG_ORDER.filter((t) => present.has(t));
 }

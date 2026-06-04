@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { formatLongDate, getAllBriefs } from "@/lib/briefs";
 import SubscribeForm from "./components/SubscribeForm";
+import SearchBox from "./components/SearchBox";
 
 const LATEST_COUNT = 10;
 
@@ -31,6 +32,7 @@ export default function Home() {
           Beta
         </span>
         <SubscribeForm />
+        <SearchBox />
       </section>
 
       <section className="w-full max-w-3xl px-6 py-12 sm:py-16">

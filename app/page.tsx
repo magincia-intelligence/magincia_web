@@ -3,8 +3,12 @@ import Link from "next/link";
 import { formatLongDate, getAllBriefs } from "@/lib/briefs";
 import SubscribeForm from "./components/SubscribeForm";
 
+const LATEST_COUNT = 10;
+
 export default function Home() {
-  const briefs = getAllBriefs();
+  const allBriefs = getAllBriefs();
+  const briefs = allBriefs.slice(0, LATEST_COUNT);
+  const hasMore = allBriefs.length > LATEST_COUNT;
 
   return (
     <div className="flex flex-col items-center w-full bg-cream">
@@ -69,6 +73,17 @@ export default function Home() {
               </li>
             ))}
           </ul>
+        )}
+
+        {hasMore && (
+          <div className="mt-8">
+            <Link
+              href="/archive"
+              className="inline-block text-sm font-medium text-blue transition-colors hover:text-vermillion"
+            >
+              Browse all briefs by month →
+            </Link>
+          </div>
         )}
       </section>
     </div>

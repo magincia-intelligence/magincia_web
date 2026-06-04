@@ -1,9 +1,14 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import { formatLongDate, getAllBriefs, getBrief } from "@/lib/briefs";
+import {
+  briefTags,
+  formatLongDate,
+  getAllBriefs,
+  getBrief,
+  parseBrief,
+} from "@/lib/briefs";
+import BriefBody from "./BriefBody";
 
 export const dynamicParams = false;
 
@@ -69,6 +74,8 @@ export default async function BriefPage({
   if (!brief) notFound();
 
   const { meta, body } = brief;
+  const sections = parseBrief(body);
+  const tags = briefTags(sections);
   const longDate = formatLongDate(meta.date);
   const dateline = [
     [meta.weekday, longDate].filter(Boolean).join(", "),
@@ -140,20 +147,7 @@ export default async function BriefPage({
         )}
       </header>
 
-      <article className="prose prose-lg max-w-none">
-        <ReactMarkdown
-          remarkPlugins={[remarkGfm]}
-          components={{
-            a: ({ href, children }) => (
-              <a href={href} target="_blank" rel="noopener noreferrer">
-                {children}
-              </a>
-            ),
-          }}
-        >
-          {body}
-        </ReactMarkdown>
-      </article>
+      <BriefBody sections={sections} tags={tags} />
     </main>
   );
 }

@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 
-type Status = "idle" | "loading" | "subscribed" | "already" | "error";
+type Status = "idle" | "loading" | "pending" | "error";
 
 export default function SubscribeForm() {
   const [email, setEmail] = useState("");
@@ -29,13 +29,12 @@ export default function SubscribeForm() {
         error?: string;
       };
 
-      if (data.ok && data.status === "subscribed") {
-        setStatus("subscribed");
-        setMessage("You're on the list. We'll send the next brief to your inbox.");
+      if (data.ok) {
+        setStatus("pending");
+        setMessage(
+          "Almost there — check your inbox and click the confirmation link to finish subscribing.",
+        );
         setEmail("");
-      } else if (data.ok && data.status === "already_subscribed") {
-        setStatus("already");
-        setMessage("You're already subscribed — no need to sign up again.");
       } else {
         setStatus("error");
         setMessage(data.error || "Something went wrong. Please try again.");
@@ -47,7 +46,7 @@ export default function SubscribeForm() {
   }
 
   const disabled = status === "loading";
-  const success = status === "subscribed" || status === "already";
+  const success = status === "pending";
 
   return (
     <form

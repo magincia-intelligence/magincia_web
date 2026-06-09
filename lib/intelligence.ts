@@ -12,8 +12,10 @@ function getPool(): Pool {
     globalForPg._pgPool = new Pool({
       connectionString,
       ssl: { rejectUnauthorized: false }, // Supabase pooler
-      max: 3,
-      idleTimeoutMillis: 30_000,
+      max: 1,                       // keep the per-instance footprint tiny (pooler cap is low)
+      idleTimeoutMillis: 10_000,
+      allowExitOnIdle: true,
+      connectionTimeoutMillis: 10_000,
     });
   }
   return globalForPg._pgPool;

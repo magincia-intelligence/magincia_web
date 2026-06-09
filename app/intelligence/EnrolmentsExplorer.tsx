@@ -310,7 +310,8 @@ export default function EnrolmentsExplorer({
           {/* title block */}
           <text x="14" y="24" fontSize="15" fontWeight="700" fill={NAVY}>{title}</text>
           <text x="14" y="42" fontSize="11.5" fill={NAVY} fillOpacity="0.6">{subtitle}</text>
-          <text x={W - 14} y="24" textAnchor="end" fontSize="12" fontWeight="600" fill={VERM}>magincia.ai</text>
+          {/* branding — bottom-left corner */}
+          <text x="14" y={H - 6} fontSize="11" fontWeight="700" fill={VERM}>magincia.ai</text>
 
           {/* ---------- COMPARE ---------- */}
           {view === "compare" && compare && (
@@ -374,11 +375,12 @@ export default function EnrolmentsExplorer({
               })()}
               {hover != null && hover >= 1 && hover <= 12 && (() => {
                 const month = hover, x = compare.xOf(month);
+                const cur = byYear.get(maxYear)![month]; // current-year value at this month
                 const rows = compare.shown.slice().reverse()
                   .map((y) => ({ y, v: byYear.get(y)![month] }))
                   .filter((r) => !Number.isNaN(r.v));
                 if (!rows.length) return null;
-                const h = 18 + rows.length * 15;
+                const h = 22 + rows.length * 15;
                 return (
                   <g data-hover>
                     <line x1={x} x2={x} y1={M.top} y2={M.top + innerH} stroke={NAVY} strokeOpacity="0.25" strokeDasharray="3 3" />
@@ -386,16 +388,27 @@ export default function EnrolmentsExplorer({
                       <circle key={r.y} cx={x} cy={yOf(r.v, compare.yMax)} r={r.y === maxYear ? 4 : 2.5}
                         fill={r.y === maxYear ? VERM : NAVY} fillOpacity={r.y === maxYear ? 1 : 0.4} />
                     ))}
-                    <g transform={`translate(${Math.min(x + 8, W - 132)}, ${M.top + 4})`}>
-                      <rect width="124" height={h} rx="4" fill={NAVY} />
-                      <text x="8" y="15" fill={CREAM} fillOpacity="0.7" fontSize="10">{MONTHS[month]} (YTD)</text>
-                      {rows.map((r, i) => (
-                        <text key={r.y} x="8" y={30 + i * 15} fontSize="11"
-                          fill={r.y === maxYear ? VERM : CREAM} fillOpacity={r.y === maxYear ? 1 : 0.8}
-                          fontWeight={r.y === maxYear ? 700 : 400}>
-                          {r.y}: {intFmt.format(r.v)}
-                        </text>
-                      ))}
+                    <g transform={`translate(${Math.min(x + 8, W - 172)}, ${M.top + 4})`}>
+                      <rect width="164" height={h} rx="4" fill={NAVY} />
+                      <text x="8" y="15" fill={CREAM} fillOpacity="0.7" fontSize="10">
+                        {MONTHS[month]} YTD{Number.isFinite(cur) ? ` · Δ vs ${maxYear}` : ""}
+                      </text>
+                      {rows.map((r, i) => {
+                        const isCur = r.y === maxYear;
+                        const d = Number.isFinite(cur) && r.v ? ((cur - r.v) / r.v) * 100 : NaN;
+                        return (
+                          <text key={r.y} x="8" y={34 + i * 15} fontSize="11"
+                            fill={isCur ? VERM : CREAM} fillOpacity={isCur ? 1 : 0.85}
+                            fontWeight={isCur ? 700 : 400}>
+                            {r.y}: {intFmt.format(r.v)}
+                            {!isCur && Number.isFinite(d) && (
+                              <tspan fill={d >= 0 ? "#86E0A6" : "#F4A28C"}>
+                                {"  "}{d >= 0 ? "+" : ""}{d.toFixed(1)}%
+                              </tspan>
+                            )}
+                          </text>
+                        );
+                      })}
                     </g>
                   </g>
                 );

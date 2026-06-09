@@ -218,7 +218,7 @@ export async function getKpis(filters: Filters): Promise<Kpis> {
         sum(case when month_num = 12 then ytd_commencements else 0 end)     as dec_c,
         sum(case when month_num = $${ppMn} then ytd_commencements else 0 end) as mon_c
       from gold.mart_enrolments_explorer
-      where year < $${ppCur} and year >= $${ppCur} - 6 and month_num in (12, $${ppMn})
+      where year < $${ppCur} and year >= $${ppCur} - 3 and month_num in (12, $${ppMn})
       ${pConds.length ? " and " + pConds.join(" and ") : ""}
       group by year
     ) t where mon_e > 0 and mon_c > 0`;

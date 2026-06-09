@@ -170,7 +170,7 @@ export default function EnrolmentsExplorer({
     const curArr = byYear.get(maxYear)!;
     let lastM = -1;
     for (let m = 12; m >= 1; m--) if (!Number.isNaN(curArr[m])) { lastM = m; break; }
-    const priorYs = years.filter((y) => y < maxYear).slice(-5);
+    const priorYs = years.filter((y) => y < maxYear).slice(-3);
     const proj: number[] = new Array(13).fill(NaN);
     if (lastM > 0 && lastM < 12) {
       proj[lastM] = curArr[lastM];

@@ -146,6 +146,92 @@ export async function getBreakdown(
   };
 }
 
+// ---- Headline KPIs: latest YTD totals vs same month prior year -----------
+export type Kpis = {
+  monthNum: number;
+  currentYear: number;
+  previousYear: number;
+  enrolments: { current: number; previous: number; projected: number };
+  commencements: { current: number; previous: number; projected: number };
+};
+
+export async function getKpis(filters: Filters): Promise<Kpis> {
+  const pool = getPool();
+  const latest = await pool.query(
+    `select year, month_num from gold.mart_enrolments_explorer order by reporting_date desc limit 1`);
+  const currentYear = Number(latest.rows[0].year);
+  const monthNum = Number(latest.rows[0].month_num);
+  const previousYear = currentYear - 1;
+
+  const conds: string[] = [];
+  const params: (string | number)[] = [];
+  const add = (col: string, val?: string | null) => {
+    if (val && val !== "All") { params.push(val); conds.push(`${col} = $${params.length}`); }
+  };
+  add("sector", filters.sector);
+  add("region", filters.region);
+  add("nationality", filters.nationality);
+  add("state", filters.state);
+  add("provider_type", filters.providerType);
+  params.push(monthNum); const pMn = params.length;
+  params.push(currentYear); const pCur = params.length;
+  params.push(previousYear); const pPrev = params.length;
+  const where = `month_num = $${pMn} and year in ($${pCur}, $${pPrev})`
+    + (conds.length ? " and " + conds.join(" and ") : "");
+  const sql = `
+    select
+      sum(case when year = $${pCur} then ytd_enrolments else 0 end)::bigint     as enr_cur,
+      sum(case when year = $${pPrev} then ytd_enrolments else 0 end)::bigint    as enr_prev,
+      sum(case when year = $${pCur} then ytd_commencements else 0 end)::bigint  as com_cur,
+      sum(case when year = $${pPrev} then ytd_commencements else 0 end)::bigint as com_prev
+    from gold.mart_enrolments_explorer
+    where ${where}`;
+  const { rows } = await pool.query(sql, params);
+  const r = rows[0] ?? {};
+  const enrCur = Number(r.enr_cur || 0), enrPrev = Number(r.enr_prev || 0);
+  const comCur = Number(r.com_cur || 0), comPrev = Number(r.com_prev || 0);
+
+  // Full-year projection: scale the current YTD-at-month total by the average
+  // historical (December YTD / same-month YTD) ratio over recent prior years.
+  const pParams: (string | number)[] = [];
+  const pConds: string[] = [];
+  const padd = (col: string, val?: string | null) => {
+    if (val && val !== "All") { pParams.push(val); pConds.push(`${col} = $${pParams.length}`); }
+  };
+  padd("sector", filters.sector);
+  padd("region", filters.region);
+  padd("nationality", filters.nationality);
+  padd("state", filters.state);
+  padd("provider_type", filters.providerType);
+  pParams.push(currentYear); const ppCur = pParams.length;
+  pParams.push(monthNum); const ppMn = pParams.length;
+  const projSql = `
+    select avg(dec_e::numeric / nullif(mon_e, 0)) as fe,
+           avg(dec_c::numeric / nullif(mon_c, 0)) as fc
+    from (
+      select year,
+        sum(case when month_num = 12 then ytd_enrolments else 0 end)        as dec_e,
+        sum(case when month_num = $${ppMn} then ytd_enrolments else 0 end)  as mon_e,
+        sum(case when month_num = 12 then ytd_commencements else 0 end)     as dec_c,
+        sum(case when month_num = $${ppMn} then ytd_commencements else 0 end) as mon_c
+      from gold.mart_enrolments_explorer
+      where year < $${ppCur} and year >= $${ppCur} - 6 and month_num in (12, $${ppMn})
+      ${pConds.length ? " and " + pConds.join(" and ") : ""}
+      group by year
+    ) t where mon_e > 0 and mon_c > 0`;
+  const proj = await pool.query(projSql, pParams);
+  const fe = Number(proj.rows[0]?.fe);
+  const fc = Number(proj.rows[0]?.fc);
+  const projEnr = monthNum === 12 || !Number.isFinite(fe) ? enrCur : Math.round(enrCur * fe);
+  const projCom = monthNum === 12 || !Number.isFinite(fc) ? comCur : Math.round(comCur * fc);
+
+  return {
+    monthNum, currentYear, previousYear,
+    enrolments: { current: enrCur, previous: enrPrev, projected: projEnr },
+    commencements: { current: comCur, previous: comPrev, projected: projCom },
+  };
+}
+
 /** Distinct values for each filter, for populating the controls. */
 export async function getFilterOptions(): Promise<FilterOptions> {
   const pool = getPool();

@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { FilterOptions, SeriesPoint } from "@/lib/intelligence";
 import ComparisonModule from "./ComparisonModule";
+import KpiBand from "./KpiBand";
+import MarketMatrix from "./MarketMatrix";
 
 type Measure = "enrolments" | "commencements";
 type View = "compare" | "history";
@@ -251,6 +253,10 @@ export default function EnrolmentsExplorer({
 
   return (
     <div className="mt-8 space-y-6">
+    {/* Headline KPI band */}
+    <KpiBand filters={moduleFilters} />
+
+    {/* Whole-market trend chart */}
     <div className="rounded-xl border border-navy/10 bg-white/70 p-4 sm:p-6">
       {/* Controls */}
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -505,17 +511,28 @@ export default function EnrolmentsExplorer({
       </p>
     </div>
 
-    {/* Comparison breakdowns — latest period vs the same month a year earlier */}
+    {/* Where students come from */}
     <section className="space-y-4">
       <h2 className="text-lg font-semibold tracking-tight text-navy">
-        Market Breakdown — Latest Period vs a Year Ago
+        Where Students Come From <span className="text-sm font-normal text-navy/45">— latest period vs a year ago</span>
       </h2>
-      <ComparisonModule
-        title="Top 10 Source Markets" dimension="nationality" measure={measure}
-        filters={moduleFilters} topN={10} sortable minForGrowth={200}
-      />
+      <div className="grid gap-4 lg:grid-cols-2">
+        <ComparisonModule
+          title="Top 10 Source Markets" dimension="nationality" measure={measure}
+          filters={moduleFilters} topN={10} sortable minForGrowth={200}
+        />
+        <ComparisonModule title="By Region" dimension="region" measure={measure} filters={moduleFilters} />
+      </div>
+      <MarketMatrix measure={measure} filters={moduleFilters} />
+    </section>
+
+    {/* Where students go */}
+    <section className="space-y-4">
+      <h2 className="text-lg font-semibold tracking-tight text-navy">
+        Where Students Go <span className="text-sm font-normal text-navy/45">— latest period vs a year ago</span>
+      </h2>
       <div className="grid gap-4 md:grid-cols-2">
-        <ComparisonModule title="By State & Territory" dimension="state" measure={measure} filters={moduleFilters} />
+        <ComparisonModule title="By State &amp; Territory" dimension="state" measure={measure} filters={moduleFilters} />
         <ComparisonModule title="By Sector" dimension="sector" measure={measure} filters={moduleFilters} />
       </div>
     </section>

@@ -88,10 +88,14 @@ export default function ComparisonModule({
             return (
               <div key={r.label} className="grid grid-cols-[7.5rem_1fr_4.5rem_3.5rem] items-center gap-2 text-sm">
                 <span className="truncate text-navy/80" title={r.label}>{r.label}</span>
-                <div className="relative h-4 rounded bg-navy/5">
-                  <div className="absolute inset-y-0 left-0 rounded bg-blue/85" style={{ width: `${curW}%` }} />
-                  {/* prior-year marker */}
-                  <div className="absolute inset-y-[-2px] w-0.5 bg-vermillion/70" style={{ left: `calc(${prevW}% - 1px)` }} title={`Prev: ${intFmt.format(r.previous)}`} />
+                <div className="relative h-5 rounded bg-navy/[0.06]">
+                  <div className="absolute inset-y-0 left-0 rounded bg-blue" style={{ width: `${curW}%` }} />
+                  {/* prior-year marker: navy-edged cream tick — high luminance
+                      contrast on both the blue bar and the light track */}
+                  <div className="absolute inset-y-[-3px] w-[3px] -translate-x-1/2 rounded-sm bg-navy"
+                    style={{ left: `${prevW}%` }} title={`Previous year: ${intFmt.format(r.previous)}`}>
+                    <div className="absolute inset-x-[1px] inset-y-[1px] rounded-[1px] bg-cream" />
+                  </div>
                 </div>
                 <span className="text-right tabular-nums text-navy/80">{intFmt.format(r.current)}</span>
                 <span className={`text-right tabular-nums font-semibold ${r.pct == null ? "text-navy/40" : up ? "text-blue" : "text-vermillion"}`}>
@@ -102,8 +106,11 @@ export default function ComparisonModule({
           })
         )}
       </div>
-      <p className="mt-2 text-[11px] text-navy/40">
-        Bar = current YTD · <span className="text-vermillion/80">|</span> marks prior year · % = year-on-year change
+      <p className="mt-2 flex items-center gap-1.5 text-[11px] text-navy/45">
+        <span className="inline-block h-2.5 w-3 rounded-sm bg-blue" /> Current year
+        <span className="ml-1 inline-block h-3 w-[3px] rounded-sm bg-navy">
+          <span className="block h-full w-[1px] mx-auto bg-cream" />
+        </span> Previous year · % = year-on-year change
       </p>
     </div>
   );

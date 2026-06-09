@@ -528,10 +528,14 @@ export default function EnrolmentsExplorer({
       <h2 className="text-lg font-semibold tracking-tight text-navy">
         Where Students Come From <span className="text-sm font-normal text-navy/45">— latest period vs a year ago</span>
       </h2>
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <ComparisonModule
           title="Top 10 Source Markets" dimension="nationality" measure={measure}
           filters={moduleFilters} topN={10} sortable minForGrowth={200}
+        />
+        <ComparisonModule
+          title="Fastest-Growing Markets" dimension="nationality" measure={measure}
+          filters={moduleFilters} topN={10} sortable defaultSort="growth" minForGrowth={500}
         />
         <ComparisonModule title="By Region" dimension="region" measure={measure} filters={moduleFilters} />
       </div>

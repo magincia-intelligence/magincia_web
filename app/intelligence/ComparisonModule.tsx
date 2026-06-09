@@ -9,7 +9,7 @@ const intFmt = new Intl.NumberFormat("en-AU");
 type Sort = "volume" | "growth";
 
 export default function ComparisonModule({
-  title, dimension, measure, filters, topN, sortable = false, minForGrowth = 0,
+  title, dimension, measure, filters, topN, sortable = false, minForGrowth = 0, defaultSort = "volume",
 }: {
   title: string;
   dimension: "nationality" | "state" | "sector" | "region" | "provider_type";
@@ -18,10 +18,11 @@ export default function ComparisonModule({
   topN?: number;
   sortable?: boolean;
   minForGrowth?: number;
+  defaultSort?: Sort;
 }) {
   const [data, setData] = useState<Breakdown | null>(null);
   const [loading, setLoading] = useState(true);
-  const [sort, setSort] = useState<Sort>("volume");
+  const [sort, setSort] = useState<Sort>(defaultSort);
   const first = useRef(true);
 
   useEffect(() => {

@@ -15,8 +15,10 @@ const VERM = "#EA401C";
 const CREAM = "#F5EAD7";
 
 const W = 820;
-const H = 400;
-const M = { top: 56, right: 104, bottom: 34, left: 60 }; // top holds the title; right holds end labels
+const H = 470;
+// top holds title + subtitle + legend; bottom holds axis label + branding;
+// left holds the rotated y-axis title; right holds end-of-line labels.
+const M = { top: 84, right: 112, bottom: 66, left: 82 };
 const innerW = W - M.left - M.right;
 const innerH = H - M.top - M.bottom;
 
@@ -90,7 +92,7 @@ export default function EnrolmentsExplorer({
   const initialMonth = initialSeries.length
     ? new Date(initialSeries[initialSeries.length - 1].date).getUTCMonth() + 1 : 12;
   const [selectedMonth, setSelectedMonth] = useState(initialMonth);
-  const [showProjection, setShowProjection] = useState(true);
+  const [showProjection, setShowProjection] = useState(false);
   const [series, setSeries] = useState<SeriesPoint[]>(initialSeries);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -138,8 +140,8 @@ export default function EnrolmentsExplorer({
   const measureLabel = measure === "enrolments" ? "Enrolments" : "Commencements";
   const title = `Australian International Student ${measureLabel}`;
   const context = view === "compare"
-    ? "YTD · Year Comparison"
-    : `YTD at ${MONTHS[selectedMonth]} · By Year`;
+    ? "Year to Date (YTD) · Year Comparison"
+    : `Year to Date (YTD) at ${MONTHS[selectedMonth]} · By Year`;
   const subtitle = [
     context,
     sector !== "All" ? sector : "All Sectors",
@@ -373,7 +375,7 @@ export default function EnrolmentsExplorer({
         <svg
           ref={svgRef}
           viewBox={`0 0 ${W} ${H}`}
-          className="mx-auto block w-full max-h-[460px]"
+          className="mx-auto block w-full max-h-[540px]"
           role="img"
           aria-label={title}
           onMouseMove={onMove}
@@ -383,10 +385,49 @@ export default function EnrolmentsExplorer({
           <rect x="0" y="0" width={W} height={H} fill="#ffffff" />
 
           {/* title block */}
-          <text x="14" y="26" fontSize="20" fontWeight="700" fill={NAVY}>{title}</text>
-          <text x="14" y="45" fontSize="12" fill={NAVY} fillOpacity="0.6">{subtitle}</text>
+          <text x="14" y="28" fontSize="20" fontWeight="700" fill={NAVY}>{title}</text>
+          <text x="14" y="48" fontSize="12" fill={NAVY} fillOpacity="0.6">{subtitle}</text>
+          {/* legend — just under the subtitle */}
+          {(() => {
+            const items = view === "compare"
+              ? [
+                  { color: VERM, label: `${maxYear} (Current)`, kind: "line" as const },
+                  { color: NAVY, label: `Previous ${PRIOR_YEARS} Years`, kind: "line" as const, faint: true },
+                  ...(showProjection ? [{ color: VERM, label: `${maxYear} Projection (Indicative)`, kind: "dash" as const }] : []),
+                ]
+              : [
+                  { color: VERM, label: `${maxYear} (Current)`, kind: "bar" as const },
+                  { color: NAVY, label: "Previous Years", kind: "bar" as const, faint: true },
+                ];
+            let x = 14;
+            return (
+              <g>
+                {items.map((it, i) => {
+                  const sw = 18, gap = 6, charW = 6.1;
+                  const startX = x;
+                  const textX = startX + sw + gap;
+                  x = textX + it.label.length * charW + 18;
+                  return (
+                    <g key={i}>
+                      {it.kind === "bar"
+                        ? <rect x={startX} y={64} width={sw} height={8} rx="1" fill={it.color} fillOpacity={it.faint ? 0.28 : 1} />
+                        : <line x1={startX} y1={68} x2={startX + sw} y2={68} stroke={it.color}
+                            strokeWidth={it.kind === "dash" ? 2 : 2.5} strokeOpacity={it.faint ? 0.4 : 1}
+                            strokeDasharray={it.kind === "dash" ? "4 4" : undefined} />}
+                      <text x={textX} y={71} fontSize="11" fill={NAVY} fillOpacity="0.7">{it.label}</text>
+                    </g>
+                  );
+                })}
+              </g>
+            );
+          })()}
+          {/* y-axis title (rotated) */}
+          <text transform={`translate(20, ${M.top + innerH / 2}) rotate(-90)`} textAnchor="middle"
+            fontSize="11" fontWeight="600" fill={NAVY} fillOpacity="0.55">
+            {measureLabel} (Year to Date)
+          </text>
           {/* branding — bottom-left corner */}
-          <text x="14" y={H - 6} fontSize="11" fontWeight="700" fill={VERM}>magincia.ai</text>
+          <text x="14" y={H - 8} fontSize="11" fontWeight="700" fill={VERM}>magincia.ai</text>
 
           {/* ---------- COMPARE ---------- */}
           {view === "compare" && compare && (
@@ -398,8 +439,9 @@ export default function EnrolmentsExplorer({
                 </g>
               ))}
               {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
-                <text key={m} x={compare.xOf(m)} y={H - 12} textAnchor="middle" fill={NAVY} fillOpacity="0.5" fontSize="11">{MONTHS[m]}</text>
+                <text key={m} x={compare.xOf(m)} y={M.top + innerH + 18} textAnchor="middle" fill={NAVY} fillOpacity="0.5" fontSize="11">{MONTHS[m]}</text>
               ))}
+              <text x={M.left + innerW / 2} y={M.top + innerH + 40} textAnchor="middle" fontSize="11" fontWeight="600" fill={NAVY} fillOpacity="0.5">Month</text>
               {compare.shown.filter((y) => y !== maxYear).map((y) => {
                 const age = maxYear - y;
                 return (
@@ -427,11 +469,17 @@ export default function EnrolmentsExplorer({
                 if (lm < 0) return null;
                 const v = arr[lm], x = compare.xOf(lm), y = yOf(v, compare.yMax);
                 const near = x > W - 110;
+                const label = intFmt.format(v);
+                const lw = label.length * 7.6 + 8;
+                const lx = near ? x - 8 : x + 8;
                 return (
                   <g>
                     <circle cx={x} cy={y} r="4" fill={VERM} />
-                    <text x={near ? x - 8 : x + 8} y={y - 8} textAnchor={near ? "end" : "start"}
-                      fontSize="13" fontWeight="700" fill={VERM}>{intFmt.format(v)}</text>
+                    {/* light background so the value stays legible over gridlines/projection */}
+                    <rect x={near ? lx - lw : lx} y={y - 21} width={lw} height={16} rx="3"
+                      fill={CREAM} fillOpacity="0.92" stroke={VERM} strokeOpacity="0.25" />
+                    <text x={near ? lx - 4 : lx + 4} y={y - 9} textAnchor={near ? "end" : "start"}
+                      fontSize="13" fontWeight="700" fill={VERM}>{label}</text>
                   </g>
                 );
               })()}
@@ -513,8 +561,9 @@ export default function EnrolmentsExplorer({
                 </g>
               ))}
               {trend.ticks.map((t, i) => (
-                <text key={i} x={t.x} y={H - 12} textAnchor="middle" fill={NAVY} fillOpacity="0.5" fontSize="11">{t.label}</text>
+                <text key={i} x={t.x} y={M.top + innerH + 18} textAnchor="middle" fill={NAVY} fillOpacity="0.5" fontSize="11">{t.label}</text>
               ))}
+              <text x={M.left + innerW / 2} y={M.top + innerH + 40} textAnchor="middle" fontSize="11" fontWeight="600" fill={NAVY} fillOpacity="0.5">Year</text>
               {/* bars: current year red, prior years grey */}
               {trend.pts.map((p, i) => {
                 const x = trend.cx(i);
@@ -556,30 +605,29 @@ export default function EnrolmentsExplorer({
           )}
 
           {/* source credit (bottom-right, free corner) */}
-          <text x={W - 12} y={H - 6} textAnchor="end" fontSize="9" fill={NAVY} fillOpacity="0.4">
+          <text x={W - 12} y={H - 8} textAnchor="end" fontSize="9" fill={NAVY} fillOpacity="0.4">
             Source: Australian Department of Education
           </text>
         </svg>
-
-        {view === "compare" && compare && (
-          <div className="mt-1 flex items-center justify-center gap-5 text-xs text-navy/60">
-            <span className="flex items-center gap-1.5">
-              <span className="inline-block h-0.5 w-5 bg-vermillion" /> {maxYear} (Current)
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="inline-block h-0.5 w-5 bg-navy/30" /> Previous {PRIOR_YEARS} Years
-            </span>
-          </div>
-        )}
       </div>
 
       <p className="mt-3 text-xs text-navy/50">
         Figures are <strong className="font-semibold text-navy/70">year-to-date</strong> as of each month.
         {view === "compare"
-          ? ` Each line is one year's YTD path (Jan→Dec), read against the same months in prior years${showProjection ? "; the dotted line projects the current year to December (seasonality-based estimate)" : ""}.`
-          : ` Each bar is the YTD total at ${MONTHS[selectedMonth]} for that year — drag the slider to compare a different month across years.`}{" "}
+          ? " Each line is one year's path through the calendar (January to December), so the current year can be read against the same months in earlier years."
+          : ` Each bar is the year-to-date total at ${MONTHS[selectedMonth]} for that year — drag the slider to compare a different month across years.`}{" "}
         Source: Australian Department of Education.
       </p>
+
+      {view === "compare" && showProjection && (
+        <p className="mt-2 rounded-lg border border-vermillion/20 bg-vermillion/5 px-3 py-2 text-xs text-navy/55">
+          <strong className="font-semibold text-vermillion">About the projection (dotted line):</strong> this is an
+          indicative forecast, not a certainty. It extends the current year to December by applying the average
+          month-by-month growth pattern seen over the last three years to the latest actual figure. Real outcomes
+          depend on policy, visa processing, and market conditions that this simple trend cannot anticipate. It is
+          provided for general context only and should not be relied upon for decisions.
+        </p>
+      )}
     </div>
 
     {/* Where students come from */}

@@ -7,7 +7,7 @@ const NAVY = "#102238";
 const VERM = "#EA401C";
 const BLUE = "#1E487A";
 const W = 820, H = 380;
-const M = { top: 24, right: 20, bottom: 40, left: 48 };
+const M = { top: 24, right: 20, bottom: 44, left: 66 };
 const innerW = W - M.left - M.right;
 const innerH = H - M.top - M.bottom;
 const MONTHS = ["", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -109,7 +109,12 @@ export default function MarketMatrix({
         onMouseMove={onMove} onMouseLeave={() => setHover(null)}>
         {/* zero-growth axis */}
         <line x1={M.left} x2={W - M.right} y1={zeroY} y2={zeroY} stroke={NAVY} strokeOpacity="0.25" />
-        <text x={W - M.right} y={zeroY - 5} textAnchor="end" fontSize="10" fill={NAVY} fillOpacity="0.4">0% YoY</text>
+        <text x={W - M.right} y={zeroY - 5} textAnchor="end" fontSize="10" fill={NAVY} fillOpacity="0.4">0% year-on-year</text>
+        {/* y-axis bounds + title */}
+        <text x={M.left - 6} y={M.top + 10} textAnchor="end" fontSize="10" fill={NAVY} fillOpacity="0.45">+{yLim}%</text>
+        <text x={M.left - 6} y={M.top + innerH - 2} textAnchor="end" fontSize="10" fill={NAVY} fillOpacity="0.45">−{yLim}%</text>
+        <text transform={`translate(15, ${M.top + innerH / 2}) rotate(-90)`} textAnchor="middle"
+          fontSize="11" fontWeight="600" fill={NAVY} fillOpacity="0.55">Year-on-Year Growth</text>
         {/* average-volume axis */}
         {avgX > 0 && (
           <>
@@ -128,7 +133,7 @@ export default function MarketMatrix({
         )}
         {/* x axis label */}
         <text x={M.left + innerW / 2} y={H - 8} textAnchor="middle" fontSize="11" fill={NAVY} fillOpacity="0.5">
-          {measure === "enrolments" ? "Enrolments" : "Commencements"} (YTD, square-root scale) →
+          {measure === "enrolments" ? "Enrolments" : "Commencements"} (Year to Date, square-root scale) →
         </text>
         {/* points */}
         {pts.map((p, i) => (

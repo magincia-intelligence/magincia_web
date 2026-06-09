@@ -10,6 +10,7 @@ export async function GET(request: Request) {
   try {
     const series = await getSeries({
       sector: searchParams.get("sector"),
+      region: searchParams.get("region"),
       nationality: searchParams.get("nationality"),
       state: searchParams.get("state"),
       providerType: searchParams.get("providerType"),

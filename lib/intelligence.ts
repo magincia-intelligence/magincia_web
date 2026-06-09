@@ -22,6 +22,7 @@ function getPool(): Pool {
 // ---- Types --------------------------------------------------------------
 export type Filters = {
   sector?: string | null;
+  region?: string | null;
   nationality?: string | null;
   state?: string | null;
   providerType?: string | null;
@@ -35,6 +36,7 @@ export type SeriesPoint = {
 
 export type FilterOptions = {
   sectors: string[];
+  regions: string[];
   nationalities: string[];
   states: string[];
   providerTypes: string[];
@@ -51,6 +53,7 @@ function buildWhere(f: Filters): { clause: string; params: string[] } {
     }
   };
   add("sector", f.sector);
+  add("region", f.region);
   add("nationality", f.nationality);
   add("state", f.state);
   add("provider_type", f.providerType);
@@ -80,13 +83,24 @@ export async function getSeries(f: Filters): Promise<SeriesPoint[]> {
 export async function getFilterOptions(): Promise<FilterOptions> {
   const pool = getPool();
   const q = (sql: string) => pool.query(sql).then((r) => r.rows.map((x) => x.label as string));
-  const [sectors, nationalities, states, providerTypes] = await Promise.all([
+  const [sectors, regions, nationalities, states, providerTypes] = await Promise.all([
     // Sectors in a sensible analytical order rather than alphabetical.
     q(`select label from bronze.dim_sector
        order by array_position(array['Higher Education','VET','ELICOS','Schools','Non-award'], label)`),
+    q(`select distinct region as label from gold.mart_enrolments_explorer where region is not null`),
     q(`select label from bronze.dim_nationality where label is not null order by label`),
     q(`select label from bronze.dim_state order by label`),
     q(`select label from bronze.dim_provider_type order by label`),
   ]);
-  return { sectors, nationalities, states, providerTypes };
+  // Order regions by where most international students come from (not alphabetical).
+  const REGION_ORDER = [
+    "North-East Asia", "Southern & Central Asia", "South-East Asia",
+    "North Africa & Middle East", "Sub-Saharan Africa", "Americas",
+    "Southern & Eastern Europe", "North-West Europe", "Oceania & Antarctica", "Other",
+  ];
+  regions.sort((a, b) => {
+    const ia = REGION_ORDER.indexOf(a), ib = REGION_ORDER.indexOf(b);
+    return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
+  });
+  return { sectors, regions, nationalities, states, providerTypes };
 }

@@ -78,6 +78,7 @@ export default function EnrolmentsExplorer({
   options, initialSeries,
 }: { options: FilterOptions; initialSeries: SeriesPoint[] }) {
   const [sector, setSector] = useState("All");
+  const [region, setRegion] = useState("All");
   const [nationality, setNationality] = useState("All");
   const [state, setState] = useState("All");
   const [providerType, setProviderType] = useState("All");
@@ -97,6 +98,7 @@ export default function EnrolmentsExplorer({
     if (first.current) { first.current = false; return; }
     const params = new URLSearchParams();
     if (sector !== "All") params.set("sector", sector);
+    if (region !== "All") params.set("region", region);
     if (nationality !== "All") params.set("nationality", nationality);
     if (state !== "All") params.set("state", state);
     if (providerType !== "All") params.set("providerType", providerType);
@@ -109,7 +111,7 @@ export default function EnrolmentsExplorer({
       .catch((e) => { if (e.name !== "AbortError") setError("Couldn’t load data — try again."); })
       .finally(() => setLoading(false));
     return () => ctrl.abort();
-  }, [sector, nationality, state, providerType]);
+  }, [sector, region, nationality, state, providerType]);
 
   const latest = series.length ? series[series.length - 1] : null;
   const yOf = useCallback((v: number, yMax: number) => M.top + innerH - (v / yMax) * innerH, []);
@@ -135,10 +137,11 @@ export default function EnrolmentsExplorer({
     : `Australian international student ${measure} (YTD at ${MONTHS[selectedMonth]}) — by year`;
   const subtitle = [
     sector !== "All" ? sector : "All sectors",
+    region !== "All" ? region : null,
     nationality !== "All" ? nationality : "all source countries",
     state !== "All" ? state : "all states",
     providerType !== "All" ? providerType : "all providers",
-  ].join(" · ");
+  ].filter(Boolean).join(" · ");
 
   // ===== COMPARE ==========================================================
   const compare = useMemo(() => {
@@ -262,9 +265,12 @@ export default function EnrolmentsExplorer({
       </div>
 
       {/* Filters */}
-      <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         <Select label="Sector" value={sector} options={options.sectors} onChange={setSector} />
-        <Select label="Source country" value={nationality} options={options.nationalities} onChange={setNationality} />
+        <Select label="Region" value={region} options={options.regions}
+          onChange={(v) => { setRegion(v); if (v !== "All") setNationality("All"); }} />
+        <Select label="Source country" value={nationality} options={options.nationalities}
+          onChange={(v) => { setNationality(v); if (v !== "All") setRegion("All"); }} />
         <Select label="State" value={state} options={options.states} onChange={setState} />
         <Select label="Provider type" value={providerType} options={options.providerTypes} onChange={setProviderType} />
       </div>

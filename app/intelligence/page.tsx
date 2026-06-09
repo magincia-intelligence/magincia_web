@@ -22,7 +22,7 @@ export default async function IntelligencePage() {
   }
 
   return (
-    <main className="w-full max-w-4xl mx-auto px-6 py-16 sm:py-24">
+    <main className="w-full max-w-6xl mx-auto px-6 py-16 sm:py-24">
       <span className="inline-flex items-center rounded-full bg-vermillion px-3 py-1 text-xs font-semibold uppercase tracking-widest text-cream">
         Market Intelligence
       </span>

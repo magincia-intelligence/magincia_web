@@ -104,7 +104,7 @@ export default function MarketMatrix({
         {period ? `${period} · ` : ""}Split by 0% growth and average volume. Strengths = large &amp; growing ·
         Opportunities = small &amp; growing · Weaknesses = large &amp; declining · Threats = small &amp; declining.
       </p>
-      <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} className="mt-2 w-full"
+      <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} className="mx-auto mt-2 block w-full max-h-[440px]"
         onMouseMove={onMove} onMouseLeave={() => setHover(null)}>
         {/* zero-growth axis */}
         <line x1={M.left} x2={W - M.right} y1={zeroY} y2={zeroY} stroke={NAVY} strokeOpacity="0.25" />

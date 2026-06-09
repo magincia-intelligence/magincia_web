@@ -12,7 +12,7 @@ export default function ComparisonModule({
   title, dimension, measure, filters, topN, sortable = false, minForGrowth = 0,
 }: {
   title: string;
-  dimension: "nationality" | "state" | "sector" | "region";
+  dimension: "nationality" | "state" | "sector" | "region" | "provider_type";
   measure: "enrolments" | "commencements";
   filters: Filters;
   topN?: number;

@@ -4,7 +4,7 @@ import { getBreakdown } from "@/lib/intelligence";
 export const runtime = "nodejs";
 export const revalidate = 3600;
 
-const DIMENSIONS = new Set(["nationality", "state", "sector", "region"]);
+const DIMENSIONS = new Set(["nationality", "state", "sector", "region", "provider_type"]);
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);

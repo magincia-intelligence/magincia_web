@@ -326,7 +326,7 @@ export default function EnrolmentsExplorer({
         <svg
           ref={svgRef}
           viewBox={`0 0 ${W} ${H}`}
-          className="w-full"
+          className="mx-auto block w-full max-h-[460px]"
           role="img"
           aria-label={title}
           onMouseMove={onMove}
@@ -543,9 +543,10 @@ export default function EnrolmentsExplorer({
       <h2 className="text-lg font-semibold tracking-tight text-navy">
         Where Students Go <span className="text-sm font-normal text-navy/45">— latest period vs a year ago</span>
       </h2>
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <ComparisonModule title="By State &amp; Territory" dimension="state" measure={measure} filters={moduleFilters} />
         <ComparisonModule title="By Sector" dimension="sector" measure={measure} filters={moduleFilters} />
+        <ComparisonModule title="By Provider Type" dimension="provider_type" measure={measure} filters={moduleFilters} />
       </div>
     </section>
     </div>

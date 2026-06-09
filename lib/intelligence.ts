@@ -90,6 +90,7 @@ export type Breakdown = {
 
 const DIM_COL: Record<string, string> = {
   nationality: "nationality", state: "state", sector: "sector", region: "region",
+  provider_type: "provider_type",
 };
 const MEASURE_COL: Record<Measure, string> = {
   enrolments: "ytd_enrolments", commencements: "ytd_commencements",
@@ -124,7 +125,7 @@ export async function getBreakdown(
   add("region", dimension === "region" ? null : filters.region);
   add("nationality", dimension === "nationality" ? null : filters.nationality);
   add("state", dimension === "state" ? null : filters.state);
-  add("provider_type", filters.providerType);
+  add("provider_type", dimension === "provider_type" ? null : filters.providerType);
 
   params.push(monthNum); const pMn = params.length;
   params.push(currentYear); const pCur = params.length;

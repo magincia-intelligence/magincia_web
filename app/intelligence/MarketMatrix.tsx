@@ -9,6 +9,7 @@ const W = 820, H = 380;
 const M = { top: 24, right: 20, bottom: 40, left: 48 };
 const innerW = W - M.left - M.right;
 const innerH = H - M.top - M.bottom;
+const MONTHS = ["", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const intFmt = new Intl.NumberFormat("en-AU");
 function compact(n: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
@@ -16,24 +17,25 @@ function compact(n: number): string {
   return `${n}`;
 }
 
+type Dim = "nationality" | "region";
 type Pt = { label: string; current: number; pct: number; x: number; y: number; r: number };
 
 export default function MarketMatrix({
-  measure, filters, minVolume = 200, maxPoints = 45,
+  measure, filters,
 }: {
   measure: "enrolments" | "commencements";
   filters: Filters;
-  minVolume?: number;
-  maxPoints?: number;
 }) {
+  const [dim, setDim] = useState<Dim>("nationality");
   const [data, setData] = useState<Breakdown | null>(null);
   const [hover, setHover] = useState<number | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
 
   useEffect(() => {
-    const params = new URLSearchParams({ dimension: "nationality", measure });
+    const params = new URLSearchParams({ dimension: dim, measure });
     if (filters.sector && filters.sector !== "All") params.set("sector", filters.sector);
     if (filters.region && filters.region !== "All") params.set("region", filters.region);
+    if (filters.nationality && filters.nationality !== "All") params.set("nationality", filters.nationality);
     if (filters.state && filters.state !== "All") params.set("state", filters.state);
     if (filters.providerType && filters.providerType !== "All") params.set("providerType", filters.providerType);
     const ctrl = new AbortController();
@@ -42,11 +44,13 @@ export default function MarketMatrix({
       .then((d) => setData(d as Breakdown))
       .catch((e) => { if (e.name !== "AbortError") setData(null); });
     return () => ctrl.abort();
-  }, [measure, filters]);
+  }, [dim, measure, filters]);
 
   const { pts, yLim, period, avgX, avgVol } = useMemo(() => {
     const empty = { pts: [] as Pt[], yLim: 50, period: "", avgX: 0, avgVol: 0 };
     if (!data) return empty;
+    const minVolume = dim === "region" ? 0 : 200;
+    const maxPoints = dim === "region" ? 12 : 45;
     const base = data.rows
       .filter((r) => r.previous > 0 && r.current >= minVolume)
       .map((r) => ({ label: r.label, current: r.current, pct: ((r.current - r.previous) / r.previous) * 100 }))
@@ -61,9 +65,9 @@ export default function MarketMatrix({
     const yOf = (p: number) => M.top + innerH / 2 - (Math.max(-yLim, Math.min(yLim, p)) / yLim) * (innerH / 2);
     const rOf = (v: number) => 4 + (Math.sqrt(v) / Math.sqrt(maxV)) * 18;
     const pts = base.map((b) => ({ ...b, x: xOf(b.current), y: yOf(b.pct), r: rOf(b.current) }));
-    const period = `${["", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][data.monthNum]} ${data.currentYear} vs ${data.previousYear}`;
+    const period = `${MONTHS[data.monthNum]} ${data.currentYear} vs ${data.previousYear}`;
     return { pts, yLim, period, avgX: xOf(avgVol), avgVol };
-  }, [data, minVolume, maxPoints]);
+  }, [data, dim]);
 
   const zeroY = M.top + innerH / 2;
   const onMove = (e: React.MouseEvent<SVGSVGElement>) => {
@@ -76,18 +80,29 @@ export default function MarketMatrix({
     setHover(best);
   };
 
-  // label the largest few by volume to avoid clutter
-  const labelled = useMemo(() => new Set(pts.slice(0, 8).map((p) => p.label)), [pts]);
+  // label the largest few countries; label every region
+  const labelled = useMemo(
+    () => new Set(pts.slice(0, dim === "region" ? pts.length : 8).map((p) => p.label)),
+    [pts, dim],
+  );
 
   return (
     <div className="rounded-xl border border-navy/10 bg-white/70 p-4 sm:p-5">
-      <div className="flex items-baseline justify-between">
+      <div className="flex items-baseline justify-between gap-2">
         <h3 className="text-sm font-semibold text-navy">Source Market SWOT — Growth vs Volume</h3>
-        <span className="text-xs text-navy/45">{period}</span>
+        <div className="inline-flex rounded-md border border-navy/15 p-0.5 text-xs">
+          {(["nationality", "region"] as Dim[]).map((d) => (
+            <button key={d} onClick={() => { setDim(d); setHover(null); }}
+              className={`rounded px-2 py-0.5 font-semibold transition ${
+                dim === d ? "bg-navy text-cream" : "text-navy/55 hover:text-navy"}`}>
+              {d === "nationality" ? "Country" : "Region"}
+            </button>
+          ))}
+        </div>
       </div>
       <p className="mt-0.5 text-xs text-navy/45">
-        Split by 0% growth and average volume. Strengths = large &amp; growing · Opportunities = small &amp; growing ·
-        Weaknesses = large &amp; declining · Threats = small &amp; declining.
+        {period ? `${period} · ` : ""}Split by 0% growth and average volume. Strengths = large &amp; growing ·
+        Opportunities = small &amp; growing · Weaknesses = large &amp; declining · Threats = small &amp; declining.
       </p>
       <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} className="mt-2 w-full"
         onMouseMove={onMove} onMouseLeave={() => setHover(null)}>
@@ -110,9 +125,6 @@ export default function MarketMatrix({
             <text x={M.left + 6} y={M.top + innerH - 6} textAnchor="start" fontSize="11" fontWeight="700" fill={VERM} fillOpacity="0.45">THREATS</text>
           </>
         )}
-        {/* y bounds labels */}
-        <text x={M.left - 6} y={M.top + 6} textAnchor="end" fontSize="10" fill={NAVY} fillOpacity="0.45">+{yLim}%</text>
-        <text x={M.left - 6} y={M.top + innerH} textAnchor="end" fontSize="10" fill={NAVY} fillOpacity="0.45">−{yLim}%</text>
         {/* x axis label */}
         <text x={M.left + innerW / 2} y={H - 8} textAnchor="middle" fontSize="11" fill={NAVY} fillOpacity="0.5">
           {measure === "enrolments" ? "Enrolments" : "Commencements"} (YTD, square-root scale) →
@@ -123,7 +135,7 @@ export default function MarketMatrix({
             fill={p.pct >= 0 ? "#10B981" : VERM} fillOpacity={hover === i ? 0.85 : 0.5}
             stroke={p.pct >= 0 ? "#059669" : VERM} strokeOpacity="0.6" />
         ))}
-        {/* labels for biggest markets */}
+        {/* labels */}
         {pts.map((p) => labelled.has(p.label) && (
           <text key={`l-${p.label}`} x={p.x} y={p.y - p.r - 3} textAnchor="middle" fontSize="10" fontWeight="600" fill={NAVY} fillOpacity="0.75">
             {p.label}
@@ -132,13 +144,13 @@ export default function MarketMatrix({
         {/* hover tooltip */}
         {hover != null && pts[hover] && (() => {
           const p = pts[hover];
-          const tx = Math.min(Math.max(p.x - 70, M.left), W - M.right - 140);
+          const tx = Math.min(Math.max(p.x - 70, M.left), W - M.right - 150);
           const ty = Math.max(M.top, p.y - 52);
           return (
             <g>
               <circle cx={p.x} cy={p.y} r={p.r + 2} fill="none" stroke={NAVY} strokeOpacity="0.6" />
               <g transform={`translate(${tx}, ${ty})`}>
-                <rect width="140" height="44" rx="4" fill={NAVY} />
+                <rect width="150" height="44" rx="4" fill={NAVY} />
                 <text x="8" y="17" fill="#F5EAD7" fontSize="12" fontWeight="600">{p.label}</text>
                 <text x="8" y="33" fill="#F5EAD7" fontSize="11" fillOpacity="0.85">
                   {intFmt.format(p.current)} · {p.pct >= 0 ? "+" : ""}{p.pct.toFixed(0)}% YoY

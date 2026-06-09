@@ -44,7 +44,7 @@ export default async function IntelligencePage() {
         </div>
       )}
 
-      <p className="mt-6 text-sm text-navy/50">
+      <p className="mt-6 text-sm text-navy/60">
         Source:{" "}
         <a
           className="text-vermillion hover:underline"

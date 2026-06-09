@@ -43,7 +43,7 @@ function Select({
   label, value, options, onChange,
 }: { label: string; value: string; options: string[]; onChange: (v: string) => void }) {
   return (
-    <label className="flex flex-col gap-1 text-xs font-semibold uppercase tracking-wide text-navy/50">
+    <label className="flex flex-col gap-1 text-xs font-semibold uppercase tracking-wide text-navy/60">
       {label}
       <select
         value={value}
@@ -337,7 +337,7 @@ export default function EnrolmentsExplorer({
               className={`rounded-md border px-3 py-1.5 text-sm font-semibold transition ${
                 showProjection
                   ? "border-vermillion bg-vermillion/10 text-vermillion"
-                  : "border-navy/15 text-navy/55 hover:text-navy"
+                  : "border-navy/15 text-navy/60 hover:text-navy"
               }`}
             >
               Projection
@@ -355,7 +355,7 @@ export default function EnrolmentsExplorer({
       {/* Month control — Full history view only */}
       {view === "history" && (
         <div className="mt-4 flex items-center gap-3">
-          <span className="text-xs font-semibold uppercase tracking-wide text-navy/50">YTD at Month</span>
+          <span className="text-xs font-semibold uppercase tracking-wide text-navy/60">YTD at Month</span>
           <input
             type="range" min={1} max={12} step={1} value={selectedMonth}
             onChange={(e) => { setHover(null); setSelectedMonth(Number(e.target.value)); }}
@@ -423,7 +423,7 @@ export default function EnrolmentsExplorer({
           })()}
           {/* y-axis title (rotated) */}
           <text transform={`translate(20, ${M.top + innerH / 2}) rotate(-90)`} textAnchor="middle"
-            fontSize="11" fontWeight="600" fill={NAVY} fillOpacity="0.55">
+            fontSize="11" fontWeight="600" fill={NAVY} fillOpacity="0.6">
             {measureLabel} (Year to Date)
           </text>
           {/* branding — bottom-left corner */}
@@ -435,13 +435,13 @@ export default function EnrolmentsExplorer({
               {yTicksFor(compare.yMax).map((t, i) => (
                 <g key={i}>
                   <line x1={M.left} x2={W - M.right} y1={t.y} y2={t.y} stroke={NAVY} strokeOpacity="0.08" />
-                  <text x={M.left - 8} y={t.y + 4} textAnchor="end" fill={NAVY} fillOpacity="0.5" fontSize="11">{compact(t.v)}</text>
+                  <text x={M.left - 8} y={t.y + 4} textAnchor="end" fill={NAVY} fillOpacity="0.6" fontSize="11">{compact(t.v)}</text>
                 </g>
               ))}
               {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
-                <text key={m} x={compare.xOf(m)} y={M.top + innerH + 18} textAnchor="middle" fill={NAVY} fillOpacity="0.5" fontSize="11">{MONTHS[m]}</text>
+                <text key={m} x={compare.xOf(m)} y={M.top + innerH + 18} textAnchor="middle" fill={NAVY} fillOpacity="0.6" fontSize="11">{MONTHS[m]}</text>
               ))}
-              <text x={M.left + innerW / 2} y={M.top + innerH + 40} textAnchor="middle" fontSize="11" fontWeight="600" fill={NAVY} fillOpacity="0.5">Month</text>
+              <text x={M.left + innerW / 2} y={M.top + innerH + 40} textAnchor="middle" fontSize="11" fontWeight="600" fill={NAVY} fillOpacity="0.6">Month</text>
               {compare.shown.filter((y) => y !== maxYear).map((y) => {
                 const age = maxYear - y;
                 return (
@@ -500,9 +500,9 @@ export default function EnrolmentsExplorer({
                 for (const e of ends) { e.ly = Math.max(e.y, prevLy + 13); prevLy = e.ly; }
                 return ends.map((e) => (
                   <g key={e.year}>
-                    <circle cx={e.x} cy={e.y} r="2.5" fill={NAVY} fillOpacity="0.45" />
+                    <circle cx={e.x} cy={e.y} r="2.5" fill={NAVY} fillOpacity="0.6" />
                     {Math.abs(e.ly - e.y) > 2 && <line x1={e.x} y1={e.y} x2={e.x + 5} y2={e.ly - 3} stroke={NAVY} strokeOpacity="0.19" />}
-                    <text x={e.x + 7} y={e.ly} fontSize="11" fill={NAVY} fillOpacity="0.55">
+                    <text x={e.x + 7} y={e.ly} fontSize="11" fill={NAVY} fillOpacity="0.6">
                       <tspan fontWeight="600">{e.year}</tspan> {intFmt.format(e.v)}
                     </text>
                   </g>
@@ -557,13 +557,13 @@ export default function EnrolmentsExplorer({
               {yTicksFor(trend.yMax).map((t, i) => (
                 <g key={i}>
                   <line x1={M.left} x2={W - M.right} y1={t.y} y2={t.y} stroke={NAVY} strokeOpacity="0.08" />
-                  <text x={M.left - 8} y={t.y + 4} textAnchor="end" fill={NAVY} fillOpacity="0.5" fontSize="11">{compact(t.v)}</text>
+                  <text x={M.left - 8} y={t.y + 4} textAnchor="end" fill={NAVY} fillOpacity="0.6" fontSize="11">{compact(t.v)}</text>
                 </g>
               ))}
               {trend.ticks.map((t, i) => (
-                <text key={i} x={t.x} y={M.top + innerH + 18} textAnchor="middle" fill={NAVY} fillOpacity="0.5" fontSize="11">{t.label}</text>
+                <text key={i} x={t.x} y={M.top + innerH + 18} textAnchor="middle" fill={NAVY} fillOpacity="0.6" fontSize="11">{t.label}</text>
               ))}
-              <text x={M.left + innerW / 2} y={M.top + innerH + 40} textAnchor="middle" fontSize="11" fontWeight="600" fill={NAVY} fillOpacity="0.5">Year</text>
+              <text x={M.left + innerW / 2} y={M.top + innerH + 40} textAnchor="middle" fontSize="11" fontWeight="600" fill={NAVY} fillOpacity="0.6">Year</text>
               {/* bars: current year red, prior years grey */}
               {trend.pts.map((p, i) => {
                 const x = trend.cx(i);
@@ -605,13 +605,13 @@ export default function EnrolmentsExplorer({
           )}
 
           {/* source credit (bottom-right, free corner) */}
-          <text x={W - 12} y={H - 8} textAnchor="end" fontSize="9" fill={NAVY} fillOpacity="0.4">
+          <text x={W - 12} y={H - 8} textAnchor="end" fontSize="9" fill={NAVY} fillOpacity="0.6">
             Source: Australian Department of Education
           </text>
         </svg>
       </div>
 
-      <p className="mt-3 text-xs text-navy/50">
+      <p className="mt-3 text-xs text-navy/60">
         Figures are <strong className="font-semibold text-navy/70">year-to-date</strong> as of each month.
         {view === "compare"
           ? " Each line is one year's path through the calendar (January to December), so the current year can be read against the same months in earlier years."
@@ -620,7 +620,7 @@ export default function EnrolmentsExplorer({
       </p>
 
       {view === "compare" && showProjection && (
-        <p className="mt-2 rounded-lg border border-vermillion/20 bg-vermillion/5 px-3 py-2 text-xs text-navy/55">
+        <p className="mt-2 rounded-lg border border-vermillion/20 bg-vermillion/5 px-3 py-2 text-xs text-navy/60">
           <strong className="font-semibold text-vermillion">About the projection (dotted line):</strong> this is an
           indicative forecast, not a certainty. It extends the current year to December by applying the average
           month-by-month growth pattern seen over the last three years to the latest actual figure. Real outcomes
@@ -633,7 +633,7 @@ export default function EnrolmentsExplorer({
     {/* Where students come from */}
     <section className="space-y-4">
       <h2 className="text-lg font-semibold tracking-tight text-navy">
-        Where Students Come From <span className="text-sm font-normal text-navy/45">— latest period vs a year ago</span>
+        Where Students Come From <span className="text-sm font-normal text-navy/60">— latest period vs a year ago</span>
       </h2>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <ComparisonModule
@@ -652,7 +652,7 @@ export default function EnrolmentsExplorer({
     {/* Where students go */}
     <section className="space-y-4">
       <h2 className="text-lg font-semibold tracking-tight text-navy">
-        Where Students Go <span className="text-sm font-normal text-navy/45">— latest period vs a year ago</span>
+        Where Students Go <span className="text-sm font-normal text-navy/60">— latest period vs a year ago</span>
       </h2>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <ComparisonModule title="By State &amp; Territory" dimension="state" measure={measure} filters={moduleFilters} />

@@ -95,13 +95,13 @@ export default function MarketMatrix({
           {(["nationality", "region"] as Dim[]).map((d) => (
             <button key={d} onClick={() => { setDim(d); setHover(null); }}
               className={`rounded px-2 py-0.5 font-semibold transition ${
-                dim === d ? "bg-navy text-cream" : "text-navy/55 hover:text-navy"}`}>
+                dim === d ? "bg-navy text-cream" : "text-navy/60 hover:text-navy"}`}>
               {d === "nationality" ? "Country" : "Region"}
             </button>
           ))}
         </div>
       </div>
-      <p className="mt-0.5 text-xs text-navy/45">
+      <p className="mt-0.5 text-xs text-navy/60">
         {period ? `${period} · ` : ""}Split by 0% growth and average volume. Strengths = large &amp; growing ·
         Opportunities = small &amp; growing · Weaknesses = large &amp; declining · Threats = small &amp; declining.
       </p>
@@ -109,17 +109,17 @@ export default function MarketMatrix({
         onMouseMove={onMove} onMouseLeave={() => setHover(null)}>
         {/* zero-growth axis */}
         <line x1={M.left} x2={W - M.right} y1={zeroY} y2={zeroY} stroke={NAVY} strokeOpacity="0.25" />
-        <text x={W - M.right} y={zeroY - 5} textAnchor="end" fontSize="10" fill={NAVY} fillOpacity="0.55">0% year-on-year</text>
+        <text x={W - M.right} y={zeroY - 5} textAnchor="end" fontSize="10" fill={NAVY} fillOpacity="0.6">0% year-on-year</text>
         {/* y-axis bounds + title */}
-        <text x={M.left - 6} y={M.top + 10} textAnchor="end" fontSize="10" fill={NAVY} fillOpacity="0.45">+{yLim}%</text>
-        <text x={M.left - 6} y={M.top + innerH - 2} textAnchor="end" fontSize="10" fill={NAVY} fillOpacity="0.45">−{yLim}%</text>
+        <text x={M.left - 6} y={M.top + 10} textAnchor="end" fontSize="10" fill={NAVY} fillOpacity="0.6">+{yLim}%</text>
+        <text x={M.left - 6} y={M.top + innerH - 2} textAnchor="end" fontSize="10" fill={NAVY} fillOpacity="0.6">−{yLim}%</text>
         <text transform={`translate(15, ${M.top + innerH / 2}) rotate(-90)`} textAnchor="middle"
-          fontSize="11" fontWeight="600" fill={NAVY} fillOpacity="0.55">Year-on-Year Growth</text>
+          fontSize="11" fontWeight="600" fill={NAVY} fillOpacity="0.6">Year-on-Year Growth</text>
         {/* average-volume axis */}
         {avgX > 0 && (
           <>
             <line x1={avgX} x2={avgX} y1={M.top} y2={M.top + innerH} stroke={NAVY} strokeOpacity="0.25" strokeDasharray="4 3" />
-            <text x={avgX + 4} y={M.top + 10} fontSize="10" fill={NAVY} fillOpacity="0.55">Avg volume ({compact(avgVol)})</text>
+            <text x={avgX + 4} y={M.top + 10} fontSize="10" fill={NAVY} fillOpacity="0.6">Avg volume ({compact(avgVol)})</text>
           </>
         )}
         {/* SWOT quadrant labels */}
@@ -132,7 +132,7 @@ export default function MarketMatrix({
           </>
         )}
         {/* x axis label */}
-        <text x={M.left + innerW / 2} y={H - 8} textAnchor="middle" fontSize="11" fill={NAVY} fillOpacity="0.5">
+        <text x={M.left + innerW / 2} y={H - 8} textAnchor="middle" fontSize="11" fill={NAVY} fillOpacity="0.6">
           {measure === "enrolments" ? "Enrolments" : "Commencements"} (Year to Date, square-root scale) →
         </text>
         {/* points */}

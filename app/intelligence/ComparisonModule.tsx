@@ -66,20 +66,20 @@ export default function ComparisonModule({
             {(["volume", "growth"] as Sort[]).map((s) => (
               <button key={s} onClick={() => setSort(s)}
                 className={`rounded px-2 py-0.5 font-semibold capitalize transition ${
-                  sort === s ? "bg-navy text-cream" : "text-navy/55 hover:text-navy"}`}>
+                  sort === s ? "bg-navy text-cream" : "text-navy/60 hover:text-navy"}`}>
                 {s}
               </button>
             ))}
           </div>
         )}
       </div>
-      <p className="mt-0.5 text-xs text-navy/45">{period || " "}</p>
+      <p className="mt-0.5 text-xs text-navy/60">{period || " "}</p>
 
       <div className="mt-3 space-y-1.5">
         {loading && !data ? (
-          <p className="py-6 text-center text-sm text-navy/40">Loading…</p>
+          <p className="py-6 text-center text-sm text-navy/60">Loading…</p>
         ) : !rows.length ? (
-          <p className="py-6 text-center text-sm text-navy/40">No data for this selection.</p>
+          <p className="py-6 text-center text-sm text-navy/60">No data for this selection.</p>
         ) : (
           rows.map((r) => {
             const curW = (r.current / max) * 100;
@@ -98,7 +98,7 @@ export default function ComparisonModule({
                   </div>
                 </div>
                 <span className="text-right tabular-nums text-navy/80">{intFmt.format(r.current)}</span>
-                <span className={`text-right tabular-nums font-semibold ${r.pct == null ? "text-navy/40" : up ? "text-blue" : "text-vermillion"}`}>
+                <span className={`text-right tabular-nums font-semibold ${r.pct == null ? "text-navy/60" : up ? "text-blue" : "text-vermillion"}`}>
                   {r.pct == null ? "new" : `${up ? "+" : ""}${r.pct.toFixed(0)}%`}
                 </span>
               </div>
@@ -106,7 +106,7 @@ export default function ComparisonModule({
           })
         )}
       </div>
-      <p className="mt-2 flex items-center gap-1.5 text-[11px] text-navy/45">
+      <p className="mt-2 flex items-center gap-1.5 text-[11px] text-navy/60">
         <span className="inline-block h-2.5 w-3 rounded-sm bg-blue" /> Current year
         <span className="ml-1 inline-block h-3 w-[3px] rounded-sm bg-navy">
           <span className="block h-full w-[1px] mx-auto bg-cream" />

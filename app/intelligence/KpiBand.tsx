@@ -13,7 +13,7 @@ function Kpi({ label, current, previous, prevYear }: {
   const up = (pct ?? 0) >= 0;
   return (
     <div>
-      <div className="text-xs font-semibold uppercase tracking-wide text-navy/50">{label}</div>
+      <div className="text-xs font-semibold uppercase tracking-wide text-navy/60">{label}</div>
       <div className="mt-1 flex items-baseline gap-2">
         <span className="text-3xl font-semibold tracking-tight text-navy sm:text-4xl">{intFmt.format(current)}</span>
         {pct != null && (
@@ -22,7 +22,7 @@ function Kpi({ label, current, previous, prevYear }: {
           </span>
         )}
       </div>
-      <div className="text-xs text-navy/45">vs {intFmt.format(previous)} in {prevYear}</div>
+      <div className="text-xs text-navy/60">vs {intFmt.format(previous)} in {prevYear}</div>
     </div>
   );
 }
@@ -52,7 +52,7 @@ export default function KpiBand({ filters }: { filters: Filters }) {
     <div className="rounded-xl border border-navy/10 bg-white/70 p-5 sm:p-6">
       <div className="flex items-baseline justify-between">
         <h2 className="text-base font-semibold text-navy">International Student Volume</h2>
-        <span className="text-xs text-navy/45">{period}</span>
+        <span className="text-xs text-navy/60">{period}</span>
       </div>
       <div className="mt-4 grid grid-cols-1 gap-5 sm:grid-cols-2">
         <Kpi label="Enrolments" current={data?.enrolments.current ?? 0}
@@ -61,7 +61,7 @@ export default function KpiBand({ filters }: { filters: Filters }) {
           previous={data?.commencements.previous ?? 0} prevYear={data?.previousYear ?? 0} />
       </div>
       {data && isPartial && (
-        <div className="mt-4 border-t border-navy/10 pt-3 text-xs text-navy/55">
+        <div className="mt-4 border-t border-navy/10 pt-3 text-xs text-navy/60">
           Projected full year ({data.currentYear}), on the current trajectory:{" "}
           <span className="font-semibold text-navy">~{intFmt.format(data.enrolments.projected)}</span> enrolments ·{" "}
           <span className="font-semibold text-navy">~{intFmt.format(data.commencements.projected)}</span> commencements

@@ -148,11 +148,16 @@ export default function EnrolmentsExplorer({
     providerType !== "All" ? providerType : "All Providers",
   ].filter(Boolean).join(" · ");
 
-  // Stable filter object for the breakdown modules below the chart.
+  // Stable filter object shared by every section on the page.
   const moduleFilters = useMemo(
     () => ({ sector, region, nationality, state, providerType }),
     [sector, region, nationality, state, providerType],
   );
+  const anyFilterSet =
+    sector !== "All" || region !== "All" || nationality !== "All" || state !== "All" || providerType !== "All";
+  const resetFilters = () => {
+    setSector("All"); setRegion("All"); setNationality("All"); setState("All"); setProviderType("All");
+  };
 
   // ===== COMPARE ==========================================================
   const compare = useMemo(() => {
@@ -253,6 +258,31 @@ export default function EnrolmentsExplorer({
 
   return (
     <div className="mt-8 space-y-6">
+    {/* Global filters — apply across the whole page */}
+    <div className="sticky top-0 z-20 rounded-xl border border-navy/10 bg-cream/95 p-4 backdrop-blur sm:p-5">
+      <div className="flex flex-wrap items-end gap-3">
+        <div className="grid flex-1 grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+          <Select label="Sector" value={sector} options={options.sectors} onChange={setSector} />
+          <Select label="Region" value={region} options={options.regions}
+            onChange={(v) => { setRegion(v); if (v !== "All") setNationality("All"); }} />
+          <Select label="Source Country" value={nationality} options={options.nationalities}
+            onChange={(v) => { setNationality(v); if (v !== "All") setRegion("All"); }} />
+          <Select label="State" value={state} options={options.states} onChange={setState} />
+          <Select label="Provider Type" value={providerType} options={options.providerTypes} onChange={setProviderType} />
+        </div>
+        <div className="flex items-center gap-2">
+          <Toggle value={measure} onChange={setMeasure}
+            options={[{ key: "enrolments", label: "Enrolments" }, { key: "commencements", label: "Commencements" }]} />
+          {anyFilterSet && (
+            <button onClick={resetFilters}
+              className="rounded-md border border-navy/15 px-3 py-1.5 text-sm font-semibold text-navy/60 transition hover:border-vermillion hover:text-vermillion">
+              Reset
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+
     {/* Headline KPI band */}
     <KpiBand filters={moduleFilters} />
 
@@ -260,35 +290,17 @@ export default function EnrolmentsExplorer({
     <div className="rounded-xl border border-navy/10 bg-white/70 p-4 sm:p-6">
       {/* Controls */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-3">
-          <Toggle
-            value={view}
-            onChange={(v) => { setHover(null); setView(v); }}
-            options={[{ key: "compare", label: "Year Comparison" }, { key: "history", label: "Full History" }]}
-          />
-          <Toggle
-            value={measure}
-            onChange={setMeasure}
-            options={[{ key: "enrolments", label: "Enrolments" }, { key: "commencements", label: "Commencements" }]}
-          />
-        </div>
+        <Toggle
+          value={view}
+          onChange={(v) => { setHover(null); setView(v); }}
+          options={[{ key: "compare", label: "Year Comparison" }, { key: "history", label: "Full History" }]}
+        />
         <button
           onClick={download}
           className="inline-flex items-center gap-1.5 rounded-md border border-navy/15 px-3 py-1.5 text-sm font-semibold text-navy/70 transition hover:border-vermillion hover:text-vermillion"
         >
           <span aria-hidden>↓</span> Download Chart
         </button>
-      </div>
-
-      {/* Filters */}
-      <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-        <Select label="Sector" value={sector} options={options.sectors} onChange={setSector} />
-        <Select label="Region" value={region} options={options.regions}
-          onChange={(v) => { setRegion(v); if (v !== "All") setNationality("All"); }} />
-        <Select label="Source country" value={nationality} options={options.nationalities}
-          onChange={(v) => { setNationality(v); if (v !== "All") setRegion("All"); }} />
-        <Select label="State" value={state} options={options.states} onChange={setState} />
-        <Select label="Provider type" value={providerType} options={options.providerTypes} onChange={setProviderType} />
       </div>
 
       {/* Month control — Full history view only */}

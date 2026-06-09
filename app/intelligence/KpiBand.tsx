@@ -17,7 +17,7 @@ function Kpi({ label, current, previous, prevYear }: {
       <div className="mt-1 flex items-baseline gap-2">
         <span className="text-3xl font-semibold tracking-tight text-navy sm:text-4xl">{intFmt.format(current)}</span>
         {pct != null && (
-          <span className={`text-sm font-semibold ${up ? "text-emerald-600" : "text-vermillion"}`}>
+          <span className={`text-sm font-semibold ${up ? "text-blue" : "text-vermillion"}`}>
             {up ? "▲" : "▼"} {Math.abs(pct).toFixed(1)}%
           </span>
         )}

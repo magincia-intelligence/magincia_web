@@ -5,6 +5,7 @@ import type { Breakdown, Filters } from "@/lib/intelligence";
 
 const NAVY = "#102238";
 const VERM = "#EA401C";
+const BLUE = "#1E487A";
 const W = 820, H = 380;
 const M = { top: 24, right: 20, bottom: 40, left: 48 };
 const innerW = W - M.left - M.right;
@@ -119,8 +120,8 @@ export default function MarketMatrix({
         {/* SWOT quadrant labels */}
         {pts.length > 0 && (
           <>
-            <text x={W - M.right - 6} y={M.top + 14} textAnchor="end" fontSize="11" fontWeight="700" fill="#059669" fillOpacity="0.5">STRENGTHS</text>
-            <text x={M.left + 6} y={M.top + 14} textAnchor="start" fontSize="11" fontWeight="700" fill="#059669" fillOpacity="0.45">OPPORTUNITIES</text>
+            <text x={W - M.right - 6} y={M.top + 14} textAnchor="end" fontSize="11" fontWeight="700" fill={BLUE} fillOpacity="0.6">STRENGTHS</text>
+            <text x={M.left + 6} y={M.top + 14} textAnchor="start" fontSize="11" fontWeight="700" fill={BLUE} fillOpacity="0.55">OPPORTUNITIES</text>
             <text x={W - M.right - 6} y={M.top + innerH - 6} textAnchor="end" fontSize="11" fontWeight="700" fill={VERM} fillOpacity="0.5">WEAKNESSES</text>
             <text x={M.left + 6} y={M.top + innerH - 6} textAnchor="start" fontSize="11" fontWeight="700" fill={VERM} fillOpacity="0.45">THREATS</text>
           </>
@@ -132,8 +133,8 @@ export default function MarketMatrix({
         {/* points */}
         {pts.map((p, i) => (
           <circle key={p.label} cx={p.x} cy={p.y} r={p.r}
-            fill={p.pct >= 0 ? "#10B981" : VERM} fillOpacity={hover === i ? 0.85 : 0.5}
-            stroke={p.pct >= 0 ? "#059669" : VERM} strokeOpacity="0.6" />
+            fill={p.pct >= 0 ? BLUE : VERM} fillOpacity={hover === i ? 0.85 : 0.5}
+            stroke={p.pct >= 0 ? BLUE : VERM} strokeOpacity="0.6" />
         ))}
         {/* labels */}
         {pts.map((p) => labelled.has(p.label) && (

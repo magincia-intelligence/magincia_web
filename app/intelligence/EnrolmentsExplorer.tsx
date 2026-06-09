@@ -430,7 +430,7 @@ export default function EnrolmentsExplorer({
                             fontWeight={isCur ? 700 : 400}>
                             {r.y}: {intFmt.format(r.v)}
                             {!isCur && Number.isFinite(d) && (
-                              <tspan fill={d >= 0 ? "#86E0A6" : "#F4A28C"}>
+                              <tspan fill={d >= 0 ? "#7FAAD6" : "#F4A28C"}>
                                 {"  "}{d >= 0 ? "+" : ""}{d.toFixed(1)}%
                               </tspan>
                             )}

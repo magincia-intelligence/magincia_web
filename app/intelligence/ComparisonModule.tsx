@@ -89,12 +89,12 @@ export default function ComparisonModule({
               <div key={r.label} className="grid grid-cols-[7.5rem_1fr_4.5rem_3.5rem] items-center gap-2 text-sm">
                 <span className="truncate text-navy/80" title={r.label}>{r.label}</span>
                 <div className="relative h-4 rounded bg-navy/5">
-                  <div className="absolute inset-y-0 left-0 rounded bg-navy/70" style={{ width: `${curW}%` }} />
+                  <div className="absolute inset-y-0 left-0 rounded bg-blue/85" style={{ width: `${curW}%` }} />
                   {/* prior-year marker */}
                   <div className="absolute inset-y-[-2px] w-0.5 bg-vermillion/70" style={{ left: `calc(${prevW}% - 1px)` }} title={`Prev: ${intFmt.format(r.previous)}`} />
                 </div>
                 <span className="text-right tabular-nums text-navy/80">{intFmt.format(r.current)}</span>
-                <span className={`text-right tabular-nums font-semibold ${r.pct == null ? "text-navy/40" : up ? "text-emerald-600" : "text-vermillion"}`}>
+                <span className={`text-right tabular-nums font-semibold ${r.pct == null ? "text-navy/40" : up ? "text-blue" : "text-vermillion"}`}>
                   {r.pct == null ? "new" : `${up ? "+" : ""}${r.pct.toFixed(0)}%`}
                 </span>
               </div>

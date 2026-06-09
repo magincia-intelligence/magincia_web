@@ -44,15 +44,17 @@ export default function MarketMatrix({
     return () => ctrl.abort();
   }, [measure, filters]);
 
-  const { pts, yLim, period } = useMemo(() => {
-    if (!data) return { pts: [] as Pt[], yLim: 50, period: "" };
+  const { pts, yLim, period, avgX, avgVol } = useMemo(() => {
+    const empty = { pts: [] as Pt[], yLim: 50, period: "", avgX: 0, avgVol: 0 };
+    if (!data) return empty;
     const base = data.rows
       .filter((r) => r.previous > 0 && r.current >= minVolume)
       .map((r) => ({ label: r.label, current: r.current, pct: ((r.current - r.previous) / r.previous) * 100 }))
       .sort((a, b) => b.current - a.current)
       .slice(0, maxPoints);
-    if (!base.length) return { pts: [] as Pt[], yLim: 50, period: "" };
+    if (!base.length) return empty;
     const maxV = Math.max(...base.map((b) => b.current));
+    const avgVol = base.reduce((s, b) => s + b.current, 0) / base.length;
     const maxAbs = Math.max(20, ...base.map((b) => Math.abs(b.pct)));
     const yLim = Math.min(150, Math.ceil(maxAbs / 10) * 10);
     const xOf = (v: number) => M.left + (Math.sqrt(v) / Math.sqrt(maxV)) * innerW;
@@ -60,7 +62,7 @@ export default function MarketMatrix({
     const rOf = (v: number) => 4 + (Math.sqrt(v) / Math.sqrt(maxV)) * 18;
     const pts = base.map((b) => ({ ...b, x: xOf(b.current), y: yOf(b.pct), r: rOf(b.current) }));
     const period = `${["", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][data.monthNum]} ${data.currentYear} vs ${data.previousYear}`;
-    return { pts, yLim, period };
+    return { pts, yLim, period, avgX: xOf(avgVol), avgVol };
   }, [data, minVolume, maxPoints]);
 
   const zeroY = M.top + innerH / 2;
@@ -80,17 +82,34 @@ export default function MarketMatrix({
   return (
     <div className="rounded-xl border border-navy/10 bg-white/70 p-4 sm:p-5">
       <div className="flex items-baseline justify-between">
-        <h3 className="text-sm font-semibold text-navy">Source Markets — Volume vs Growth</h3>
+        <h3 className="text-sm font-semibold text-navy">Source Market SWOT — Growth vs Volume</h3>
         <span className="text-xs text-navy/45">{period}</span>
       </div>
       <p className="mt-0.5 text-xs text-navy/45">
-        Bubble = market size. Top-right = large &amp; growing; bottom-right = large but declining; top-left = emerging.
+        Split by 0% growth and average volume. Strengths = large &amp; growing · Opportunities = small &amp; growing ·
+        Weaknesses = large &amp; declining · Threats = small &amp; declining.
       </p>
       <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} className="mt-2 w-full"
         onMouseMove={onMove} onMouseLeave={() => setHover(null)}>
         {/* zero-growth axis */}
         <line x1={M.left} x2={W - M.right} y1={zeroY} y2={zeroY} stroke={NAVY} strokeOpacity="0.25" />
         <text x={W - M.right} y={zeroY - 5} textAnchor="end" fontSize="10" fill={NAVY} fillOpacity="0.4">0% YoY</text>
+        {/* average-volume axis */}
+        {avgX > 0 && (
+          <>
+            <line x1={avgX} x2={avgX} y1={M.top} y2={M.top + innerH} stroke={NAVY} strokeOpacity="0.25" strokeDasharray="4 3" />
+            <text x={avgX + 4} y={M.top + 10} fontSize="10" fill={NAVY} fillOpacity="0.4">Avg volume ({compact(avgVol)})</text>
+          </>
+        )}
+        {/* SWOT quadrant labels */}
+        {pts.length > 0 && (
+          <>
+            <text x={W - M.right - 6} y={M.top + 14} textAnchor="end" fontSize="11" fontWeight="700" fill="#059669" fillOpacity="0.5">STRENGTHS</text>
+            <text x={M.left + 6} y={M.top + 14} textAnchor="start" fontSize="11" fontWeight="700" fill="#059669" fillOpacity="0.45">OPPORTUNITIES</text>
+            <text x={W - M.right - 6} y={M.top + innerH - 6} textAnchor="end" fontSize="11" fontWeight="700" fill={VERM} fillOpacity="0.5">WEAKNESSES</text>
+            <text x={M.left + 6} y={M.top + innerH - 6} textAnchor="start" fontSize="11" fontWeight="700" fill={VERM} fillOpacity="0.45">THREATS</text>
+          </>
+        )}
         {/* y bounds labels */}
         <text x={M.left - 6} y={M.top + 6} textAnchor="end" fontSize="10" fill={NAVY} fillOpacity="0.45">+{yLim}%</text>
         <text x={M.left - 6} y={M.top + innerH} textAnchor="end" fontSize="10" fill={NAVY} fillOpacity="0.45">−{yLim}%</text>

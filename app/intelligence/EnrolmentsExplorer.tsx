@@ -8,7 +8,7 @@ type View = "compare" | "history";
 
 const W = 820;
 const H = 360;
-const M = { top: 16, right: 18, bottom: 30, left: 60 };
+const M = { top: 16, right: 104, bottom: 30, left: 60 }; // right margin holds end-of-line labels
 const innerW = W - M.left - M.right;
 const innerH = H - M.top - M.bottom;
 
@@ -279,8 +279,54 @@ export default function EnrolmentsExplorer({
                     strokeWidth="1.5" strokeOpacity={Math.max(0.12, 0.4 - age * 0.05)} strokeLinejoin="round" />
                 );
               })}
+              {/* end-of-line labels for prior years: year + ending value (de-overlapped) */}
+              {(() => {
+                type End = { year: number; v: number; x: number; y: number; ly: number };
+                const ends: End[] = [];
+                for (const y of compare.shown) {
+                  if (y === compare.maxYear) continue;
+                  const arr = compare.byYear.get(y)!;
+                  let lm = -1;
+                  for (let m = 12; m >= 1; m--) { if (!Number.isNaN(arr[m])) { lm = m; break; } }
+                  if (lm < 0) continue;
+                  const v = arr[lm];
+                  ends.push({ year: y, v, x: compare.xOf(lm), y: yOf(v, compare.yMax), ly: 0 });
+                }
+                ends.sort((a, b) => a.y - b.y);
+                let prevLy = -Infinity;
+                for (const e of ends) { e.ly = Math.max(e.y, prevLy + 13); prevLy = e.ly; }
+                return ends.map((e) => (
+                  <g key={e.year}>
+                    <circle cx={e.x} cy={e.y} r="2.5" fill="#102238" fillOpacity="0.45" />
+                    {Math.abs(e.ly - e.y) > 2 && (
+                      <line x1={e.x} y1={e.y} x2={e.x + 5} y2={e.ly - 3} stroke="#10223830" />
+                    )}
+                    <text x={e.x + 7} y={e.ly} fontSize="11" className="fill-navy/55">
+                      <tspan fontWeight="600">{e.year}</tspan> {intFmt.format(e.v)}
+                    </text>
+                  </g>
+                ));
+              })()}
               {/* current year (highlighted, drawn on top) */}
               <path d={compare.lineFor(compare.maxYear)} fill="none" stroke="#EA401C" strokeWidth="2.5" strokeLinejoin="round" />
+              {/* value label at the current year's latest month */}
+              {(() => {
+                const arr = compare.byYear.get(compare.maxYear)!;
+                let lm = -1;
+                for (let m = 12; m >= 1; m--) { if (!Number.isNaN(arr[m])) { lm = m; break; } }
+                if (lm < 0) return null;
+                const v = arr[lm];
+                const x = compare.xOf(lm);
+                const y = yOf(v, compare.yMax);
+                const near = x > W - 110;
+                return (
+                  <g>
+                    <circle cx={x} cy={y} r="4" fill="#EA401C" />
+                    <text x={near ? x - 8 : x + 8} y={y - 8} textAnchor={near ? "end" : "start"}
+                      fontSize="13" fontWeight="700" className="fill-vermillion">{intFmt.format(v)}</text>
+                  </g>
+                );
+              })()}
               {/* hover guide + per-year readout */}
               {hover != null && (() => {
                 const month = hover;

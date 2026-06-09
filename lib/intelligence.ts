@@ -79,6 +79,73 @@ export async function getSeries(f: Filters): Promise<SeriesPoint[]> {
   }));
 }
 
+// ---- Breakdown: current period vs same month prior year, by dimension ----
+export type BreakdownRow = { label: string; current: number; previous: number };
+export type Breakdown = {
+  monthNum: number;
+  currentYear: number;
+  previousYear: number;
+  rows: BreakdownRow[];
+};
+
+const DIM_COL: Record<string, string> = {
+  nationality: "nationality", state: "state", sector: "sector", region: "region",
+};
+const MEASURE_COL: Record<Measure, string> = {
+  enrolments: "ytd_enrolments", commencements: "ytd_commencements",
+};
+type Measure = "enrolments" | "commencements";
+
+/**
+ * For the latest YTD month, totals by `dimension` for the current year and the
+ * same month one year earlier. The dimension's own filter is ignored (so the
+ * full breakdown shows); all other filters apply.
+ */
+export async function getBreakdown(
+  dimension: string, measure: Measure, filters: Filters,
+): Promise<Breakdown> {
+  const dimCol = DIM_COL[dimension];
+  const measCol = MEASURE_COL[measure];
+  if (!dimCol || !measCol) throw new Error("invalid dimension/measure");
+  const pool = getPool();
+
+  const latest = await pool.query(
+    `select year, month_num from gold.mart_enrolments_explorer order by reporting_date desc limit 1`);
+  const currentYear = Number(latest.rows[0].year);
+  const monthNum = Number(latest.rows[0].month_num);
+  const previousYear = currentYear - 1;
+
+  const conds: string[] = [];
+  const params: (string | number)[] = [];
+  const add = (col: string, val?: string | null) => {
+    if (val && val !== "All") { params.push(val); conds.push(`${col} = $${params.length}`); }
+  };
+  add("sector", dimension === "sector" ? null : filters.sector);
+  add("region", dimension === "region" ? null : filters.region);
+  add("nationality", dimension === "nationality" ? null : filters.nationality);
+  add("state", dimension === "state" ? null : filters.state);
+  add("provider_type", filters.providerType);
+
+  params.push(monthNum); const pMn = params.length;
+  params.push(currentYear); const pCur = params.length;
+  params.push(previousYear); const pPrev = params.length;
+
+  const where = `month_num = $${pMn} and year in ($${pCur}, $${pPrev})`
+    + (conds.length ? " and " + conds.join(" and ") : "");
+  const sql = `
+    select ${dimCol} as label,
+           sum(case when year = $${pCur} then ${measCol} else 0 end)::bigint as current,
+           sum(case when year = $${pPrev} then ${measCol} else 0 end)::bigint as previous
+    from gold.mart_enrolments_explorer
+    where ${where}
+    group by ${dimCol}`;
+  const { rows } = await pool.query(sql, params);
+  return {
+    monthNum, currentYear, previousYear,
+    rows: rows.map((r) => ({ label: r.label, current: Number(r.current), previous: Number(r.previous) })),
+  };
+}
+
 /** Distinct values for each filter, for populating the controls. */
 export async function getFilterOptions(): Promise<FilterOptions> {
   const pool = getPool();

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { FilterOptions, SeriesPoint } from "@/lib/intelligence";
+import ComparisonModule from "./ComparisonModule";
 
 type Measure = "enrolments" | "commencements";
 type View = "compare" | "history";
@@ -132,16 +133,24 @@ export default function EnrolmentsExplorer({
 
   // ----- title + subtitle (also used for the downloaded image + filename) --
   const measureLabel = measure === "enrolments" ? "Enrolments" : "Commencements";
-  const title = view === "compare"
-    ? `Australian international student ${measure} (YTD) — year comparison`
-    : `Australian international student ${measure} (YTD at ${MONTHS[selectedMonth]}) — by year`;
+  const title = `Australian International Student ${measureLabel}`;
+  const context = view === "compare"
+    ? "YTD · Year Comparison"
+    : `YTD at ${MONTHS[selectedMonth]} · By Year`;
   const subtitle = [
-    sector !== "All" ? sector : "All sectors",
+    context,
+    sector !== "All" ? sector : "All Sectors",
     region !== "All" ? region : null,
-    nationality !== "All" ? nationality : "all source countries",
-    state !== "All" ? state : "all states",
-    providerType !== "All" ? providerType : "all providers",
+    nationality !== "All" ? nationality : "All Source Countries",
+    state !== "All" ? state : "All States",
+    providerType !== "All" ? providerType : "All Providers",
   ].filter(Boolean).join(" · ");
+
+  // Stable filter object for the breakdown modules below the chart.
+  const moduleFilters = useMemo(
+    () => ({ sector, region, nationality, state, providerType }),
+    [sector, region, nationality, state, providerType],
+  );
 
   // ===== COMPARE ==========================================================
   const compare = useMemo(() => {
@@ -241,14 +250,15 @@ export default function EnrolmentsExplorer({
   }, [measure, view, selectedMonth, subtitle]);
 
   return (
-    <div className="mt-8 rounded-xl border border-navy/10 bg-white/70 p-4 sm:p-6">
+    <div className="mt-8 space-y-6">
+    <div className="rounded-xl border border-navy/10 bg-white/70 p-4 sm:p-6">
       {/* Controls */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-3">
           <Toggle
             value={view}
             onChange={(v) => { setHover(null); setView(v); }}
-            options={[{ key: "compare", label: "Year comparison" }, { key: "history", label: "Full history" }]}
+            options={[{ key: "compare", label: "Year Comparison" }, { key: "history", label: "Full History" }]}
           />
           <Toggle
             value={measure}
@@ -260,7 +270,7 @@ export default function EnrolmentsExplorer({
           onClick={download}
           className="inline-flex items-center gap-1.5 rounded-md border border-navy/15 px-3 py-1.5 text-sm font-semibold text-navy/70 transition hover:border-vermillion hover:text-vermillion"
         >
-          <span aria-hidden>↓</span> Download chart
+          <span aria-hidden>↓</span> Download Chart
         </button>
       </div>
 
@@ -278,7 +288,7 @@ export default function EnrolmentsExplorer({
       {/* Month control — Full history view only */}
       {view === "history" && (
         <div className="mt-4 flex items-center gap-3">
-          <span className="text-xs font-semibold uppercase tracking-wide text-navy/50">YTD at month</span>
+          <span className="text-xs font-semibold uppercase tracking-wide text-navy/50">YTD at Month</span>
           <input
             type="range" min={1} max={12} step={1} value={selectedMonth}
             onChange={(e) => { setHover(null); setSelectedMonth(Number(e.target.value)); }}
@@ -308,8 +318,8 @@ export default function EnrolmentsExplorer({
           <rect x="0" y="0" width={W} height={H} fill="#ffffff" />
 
           {/* title block */}
-          <text x="14" y="24" fontSize="15" fontWeight="700" fill={NAVY}>{title}</text>
-          <text x="14" y="42" fontSize="11.5" fill={NAVY} fillOpacity="0.6">{subtitle}</text>
+          <text x="14" y="26" fontSize="20" fontWeight="700" fill={NAVY}>{title}</text>
+          <text x="14" y="45" fontSize="12" fill={NAVY} fillOpacity="0.6">{subtitle}</text>
           {/* branding — bottom-left corner */}
           <text x="14" y={H - 6} fontSize="11" fontWeight="700" fill={VERM}>magincia.ai</text>
 
@@ -477,10 +487,10 @@ export default function EnrolmentsExplorer({
         {view === "compare" && compare && (
           <div className="mt-1 flex items-center justify-center gap-5 text-xs text-navy/60">
             <span className="flex items-center gap-1.5">
-              <span className="inline-block h-0.5 w-5 bg-vermillion" /> {maxYear} (current)
+              <span className="inline-block h-0.5 w-5 bg-vermillion" /> {maxYear} (Current)
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="inline-block h-0.5 w-5 bg-navy/30" /> previous {PRIOR_YEARS} years
+              <span className="inline-block h-0.5 w-5 bg-navy/30" /> Previous {PRIOR_YEARS} Years
             </span>
           </div>
         )}
@@ -493,6 +503,22 @@ export default function EnrolmentsExplorer({
           : ` Each bar is the YTD total at ${MONTHS[selectedMonth]} for that year — drag the slider to compare a different month across years.`}{" "}
         Source: Australian Department of Education.
       </p>
+    </div>
+
+    {/* Comparison breakdowns — latest period vs the same month a year earlier */}
+    <section className="space-y-4">
+      <h2 className="text-lg font-semibold tracking-tight text-navy">
+        Market Breakdown — Latest Period vs a Year Ago
+      </h2>
+      <ComparisonModule
+        title="Top 10 Source Markets" dimension="nationality" measure={measure}
+        filters={moduleFilters} topN={10} sortable minForGrowth={200}
+      />
+      <div className="grid gap-4 md:grid-cols-2">
+        <ComparisonModule title="By State & Territory" dimension="state" measure={measure} filters={moduleFilters} />
+        <ComparisonModule title="By Sector" dimension="sector" measure={measure} filters={moduleFilters} />
+      </div>
+    </section>
     </div>
   );
 }

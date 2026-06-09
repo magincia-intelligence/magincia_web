@@ -109,7 +109,7 @@ export default function MarketMatrix({
         onMouseMove={onMove} onMouseLeave={() => setHover(null)}>
         {/* zero-growth axis */}
         <line x1={M.left} x2={W - M.right} y1={zeroY} y2={zeroY} stroke={NAVY} strokeOpacity="0.25" />
-        <text x={W - M.right} y={zeroY - 5} textAnchor="end" fontSize="10" fill={NAVY} fillOpacity="0.4">0% year-on-year</text>
+        <text x={W - M.right} y={zeroY - 5} textAnchor="end" fontSize="10" fill={NAVY} fillOpacity="0.55">0% year-on-year</text>
         {/* y-axis bounds + title */}
         <text x={M.left - 6} y={M.top + 10} textAnchor="end" fontSize="10" fill={NAVY} fillOpacity="0.45">+{yLim}%</text>
         <text x={M.left - 6} y={M.top + innerH - 2} textAnchor="end" fontSize="10" fill={NAVY} fillOpacity="0.45">−{yLim}%</text>
@@ -119,16 +119,16 @@ export default function MarketMatrix({
         {avgX > 0 && (
           <>
             <line x1={avgX} x2={avgX} y1={M.top} y2={M.top + innerH} stroke={NAVY} strokeOpacity="0.25" strokeDasharray="4 3" />
-            <text x={avgX + 4} y={M.top + 10} fontSize="10" fill={NAVY} fillOpacity="0.4">Avg volume ({compact(avgVol)})</text>
+            <text x={avgX + 4} y={M.top + 10} fontSize="10" fill={NAVY} fillOpacity="0.55">Avg volume ({compact(avgVol)})</text>
           </>
         )}
         {/* SWOT quadrant labels */}
         {pts.length > 0 && (
           <>
-            <text x={W - M.right - 6} y={M.top + 14} textAnchor="end" fontSize="11" fontWeight="700" fill={BLUE} fillOpacity="0.6">STRENGTHS</text>
-            <text x={M.left + 6} y={M.top + 14} textAnchor="start" fontSize="11" fontWeight="700" fill={BLUE} fillOpacity="0.55">OPPORTUNITIES</text>
-            <text x={W - M.right - 6} y={M.top + innerH - 6} textAnchor="end" fontSize="11" fontWeight="700" fill={VERM} fillOpacity="0.5">WEAKNESSES</text>
-            <text x={M.left + 6} y={M.top + innerH - 6} textAnchor="start" fontSize="11" fontWeight="700" fill={VERM} fillOpacity="0.45">THREATS</text>
+            <text x={W - M.right - 6} y={M.top + 14} textAnchor="end" fontSize="11" fontWeight="700" fill={BLUE} fillOpacity="0.85">STRENGTHS</text>
+            <text x={M.left + 6} y={M.top + 14} textAnchor="start" fontSize="11" fontWeight="700" fill={BLUE} fillOpacity="0.85">OPPORTUNITIES</text>
+            <text x={W - M.right - 6} y={M.top + innerH - 6} textAnchor="end" fontSize="11" fontWeight="700" fill={VERM} fillOpacity="0.9">WEAKNESSES</text>
+            <text x={M.left + 6} y={M.top + innerH - 6} textAnchor="start" fontSize="11" fontWeight="700" fill={VERM} fillOpacity="0.9">THREATS</text>
           </>
         )}
         {/* x axis label */}
@@ -138,8 +138,8 @@ export default function MarketMatrix({
         {/* points */}
         {pts.map((p, i) => (
           <circle key={p.label} cx={p.x} cy={p.y} r={p.r}
-            fill={p.pct >= 0 ? BLUE : VERM} fillOpacity={hover === i ? 0.85 : 0.5}
-            stroke={p.pct >= 0 ? BLUE : VERM} strokeOpacity="0.6" />
+            fill={p.pct >= 0 ? BLUE : VERM} fillOpacity={hover === i ? 0.8 : 0.55}
+            stroke={p.pct >= 0 ? BLUE : VERM} strokeWidth="1.5" strokeOpacity="1" />
         ))}
         {/* labels */}
         {pts.map((p) => labelled.has(p.label) && (

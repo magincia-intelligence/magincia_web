@@ -90,6 +90,7 @@ export default function EnrolmentsExplorer({
   const initialMonth = initialSeries.length
     ? new Date(initialSeries[initialSeries.length - 1].date).getUTCMonth() + 1 : 12;
   const [selectedMonth, setSelectedMonth] = useState(initialMonth);
+  const [showProjection, setShowProjection] = useState(true);
   const [series, setSeries] = useState<SeriesPoint[]>(initialSeries);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -163,11 +164,33 @@ export default function EnrolmentsExplorer({
   const compare = useMemo(() => {
     if (view !== "compare" || !years.length) return null;
     const shown = years.filter((y) => y >= maxYear - PRIOR_YEARS);
+
+    // Project the current year from its latest month out to December, scaling by
+    // the average historical (month-m YTD / latest-month YTD) ratio.
+    const curArr = byYear.get(maxYear)!;
+    let lastM = -1;
+    for (let m = 12; m >= 1; m--) if (!Number.isNaN(curArr[m])) { lastM = m; break; }
+    const priorYs = years.filter((y) => y < maxYear).slice(-5);
+    const proj: number[] = new Array(13).fill(NaN);
+    if (lastM > 0 && lastM < 12) {
+      proj[lastM] = curArr[lastM];
+      for (let m = lastM + 1; m <= 12; m++) {
+        const ratios: number[] = [];
+        for (const y of priorYs) {
+          const a = byYear.get(y)![m], b = byYear.get(y)![lastM];
+          if (Number.isFinite(a) && Number.isFinite(b) && b > 0) ratios.push(a / b);
+        }
+        if (ratios.length) proj[m] = curArr[lastM] * (ratios.reduce((s, r) => s + r, 0) / ratios.length);
+      }
+    }
+
     let yMax = 1;
     for (const y of shown) for (let m = 1; m <= 12; m++) {
       const v = byYear.get(y)![m];
       if (!Number.isNaN(v)) yMax = Math.max(yMax, v);
     }
+    if (showProjection) for (let m = 1; m <= 12; m++) if (Number.isFinite(proj[m])) yMax = Math.max(yMax, proj[m]);
+
     const xOf = (month: number) => M.left + ((month - 1) / 11) * innerW;
     const lineFor = (y: number) => {
       const arr = byYear.get(y)!;
@@ -180,8 +203,17 @@ export default function EnrolmentsExplorer({
       }
       return d;
     };
-    return { shown, yMax, xOf, lineFor };
-  }, [view, years, maxYear, byYear, yOf]);
+
+    let projPath = "", started = false;
+    for (let m = lastM; m >= 1 && m <= 12 && lastM < 12; m++) {
+      if (!Number.isFinite(proj[m])) continue;
+      projPath += `${started ? "L" : "M"}${xOf(m).toFixed(1)},${yOf(proj[m], yMax).toFixed(1)}`;
+      started = true;
+    }
+    const projEnd = Number.isFinite(proj[12]) ? { x: xOf(12), y: yOf(proj[12], yMax), v: proj[12] } : null;
+
+    return { shown, yMax, xOf, lineFor, projPath, projEnd };
+  }, [view, years, maxYear, byYear, yOf, showProjection]);
 
   // ===== HISTORY: one BAR per year = YTD total at the selected month =======
   const trend = useMemo(() => {
@@ -290,11 +322,26 @@ export default function EnrolmentsExplorer({
     <div className="rounded-xl border border-navy/10 bg-white/70 p-4 sm:p-6">
       {/* Controls */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <Toggle
-          value={view}
-          onChange={(v) => { setHover(null); setView(v); }}
-          options={[{ key: "compare", label: "Year Comparison" }, { key: "history", label: "Full History" }]}
-        />
+        <div className="flex flex-wrap items-center gap-2">
+          <Toggle
+            value={view}
+            onChange={(v) => { setHover(null); setView(v); }}
+            options={[{ key: "compare", label: "Year Comparison" }, { key: "history", label: "Full History" }]}
+          />
+          {view === "compare" && (
+            <button
+              onClick={() => setShowProjection((v) => !v)}
+              aria-pressed={showProjection}
+              className={`rounded-md border px-3 py-1.5 text-sm font-semibold transition ${
+                showProjection
+                  ? "border-vermillion bg-vermillion/10 text-vermillion"
+                  : "border-navy/15 text-navy/55 hover:text-navy"
+              }`}
+            >
+              Projection
+            </button>
+          )}
+        </div>
         <button
           onClick={download}
           className="inline-flex items-center gap-1.5 rounded-md border border-navy/15 px-3 py-1.5 text-sm font-semibold text-navy/70 transition hover:border-vermillion hover:text-vermillion"
@@ -361,6 +408,18 @@ export default function EnrolmentsExplorer({
                 );
               })}
               <path d={compare.lineFor(maxYear)} fill="none" stroke={VERM} strokeWidth="2.5" strokeLinejoin="round" />
+              {/* current-year projection to year-end (dotted) */}
+              {showProjection && compare.projPath && (
+                <g>
+                  <path d={compare.projPath} fill="none" stroke={VERM} strokeWidth="2" strokeDasharray="4 4" strokeOpacity="0.65" />
+                  {compare.projEnd && (
+                    <>
+                      <circle cx={compare.projEnd.x} cy={compare.projEnd.y} r="3.5" fill="none" stroke={VERM} strokeWidth="1.5" />
+                      <text x={compare.projEnd.x} y={compare.projEnd.y - 8} textAnchor="end" fontSize="10" fontWeight="600" fill={VERM} fillOpacity="0.85">proj.</text>
+                    </>
+                  )}
+                </g>
+              )}
               {(() => {
                 const arr = byYear.get(maxYear)!;
                 let lm = -1;
@@ -517,7 +576,7 @@ export default function EnrolmentsExplorer({
       <p className="mt-3 text-xs text-navy/50">
         Figures are <strong className="font-semibold text-navy/70">year-to-date</strong> as of each month.
         {view === "compare"
-          ? " Each line is one year's YTD path (Jan→Dec), so the current year can be read against the same months in prior years."
+          ? ` Each line is one year's YTD path (Jan→Dec), read against the same months in prior years${showProjection ? "; the dotted line projects the current year to December (seasonality-based estimate)" : ""}.`
           : ` Each bar is the YTD total at ${MONTHS[selectedMonth]} for that year — drag the slider to compare a different month across years.`}{" "}
         Source: Australian Department of Education.
       </p>

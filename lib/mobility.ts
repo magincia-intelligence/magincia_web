@@ -151,6 +151,37 @@ export const TOP_SOURCE_MARKETS: { iso3: string; name: string }[] = [
   { iso3: "KOR", name: "Korea, Rep." },
 ];
 
+// ---- Supply/demand index over time --------------------------------------
+export type IndexPoint = { year: number; supply: number | null; demand: number | null };
+
+/**
+ * Supply & demand index (0–100) per year for a country, from the fixed-core-
+ * basket view. Each axis is the mean percentile of its core indicators scored
+ * against the world that year, so the line tracks the country's changing
+ * position relative to peers. Returns one point per year (supply/demand may be
+ * null where that axis's core basket is incomplete that year).
+ */
+export async function getSupplyDemandSeries(iso3: string): Promise<IndexPoint[]> {
+  const code = iso3.trim().toUpperCase();
+  const { rows } = await getPool().query(
+    `select v.year_key as year, v.axis, v.index_score
+       from mobility.vw_country_axis_index v
+       join mobility.dim_country d on d.country_key = v.country_key
+      where d.iso3 = $1
+      order by v.year_key`,
+    [code],
+  );
+  const byYear = new Map<number, IndexPoint>();
+  for (const r of rows) {
+    const y = Number(r.year);
+    if (!byYear.has(y)) byYear.set(y, { year: y, supply: null, demand: null });
+    const p = byYear.get(y)!;
+    if (r.axis === "supply") p.supply = Number(r.index_score);
+    else p.demand = Number(r.index_score);
+  }
+  return [...byYear.values()].sort((a, b) => a.year - b.year);
+}
+
 /**
  * Resolve an ISO3 to the AU DoE nationality label (via the bridge), but only if
  * that label actually has enrolment data in the gold mart. Returns null when the

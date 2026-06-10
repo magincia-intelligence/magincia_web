@@ -5,14 +5,17 @@ import {
   formatValue,
   getAuNationality,
   getCountryReport,
+  getSupplyDemandSeries,
   TOP_SOURCE_MARKETS,
   type AxisScore,
   type CountryReport,
+  type IndexPoint,
   type IndicatorReport,
 } from "@/lib/mobility";
 import KpiBand from "@/app/intelligence/KpiBand";
 import ComparisonModule from "@/app/intelligence/ComparisonModule";
 import CountryEnrolmentTrend from "@/app/intelligence/mobility/CountryEnrolmentTrend";
+import SupplyDemandIndexChart from "@/app/intelligence/mobility/SupplyDemandIndexChart";
 
 // Rebuild at most daily; the underlying indicators change a few times a year.
 export const revalidate = 86400;
@@ -173,10 +176,12 @@ export default async function MobilityCountryPage({
   const { iso3 } = await params;
   let report: CountryReport | null = null;
   let auNationality: string | null = null;
+  let indexSeries: IndexPoint[] = [];
   try {
-    [report, auNationality] = await Promise.all([
+    [report, auNationality, indexSeries] = await Promise.all([
       getCountryReport(iso3),
       getAuNationality(iso3).catch(() => null),
+      getSupplyDemandSeries(iso3).catch(() => []),
     ]);
   } catch (err) {
     console.error("mobility country report failed:", err);
@@ -230,6 +235,29 @@ export default async function MobilityCountryPage({
           accent={VERMILLION}
         />
       </div>
+
+      {indexSeries.length >= 2 && (
+        <section className="mt-8 rounded-2xl border border-navy/10 bg-white/70 p-5 sm:p-6">
+          <div className="flex items-baseline justify-between gap-4">
+            <h2 className="text-lg font-semibold text-navy">Supply &amp; demand over time</h2>
+            <span className="text-xs text-navy/50">
+              {indexSeries[0].year}–{indexSeries[indexSeries.length - 1].year}
+            </span>
+          </div>
+          <p className="mt-1 max-w-3xl text-sm text-navy/60">
+            Each axis indexed 0–100 by its position <span className="font-medium">relative to the world that year</span>,
+            so a rising line means {country.name} is climbing the global ranks. A widening gap between
+            demand (above) and supply (below) signals growing pressure to study abroad.
+          </p>
+          <div className="mt-4">
+            <SupplyDemandIndexChart points={indexSeries} />
+          </div>
+          <p className="mt-2 text-xs text-navy/50">
+            Index basket (held constant for comparability): supply = Education Index + tertiary
+            enrolment ratio; demand = GDP per capita (PPP) + outbound mobility ratio.
+          </p>
+        </section>
+      )}
 
       <section className="mt-8 rounded-2xl border border-navy/10 bg-white/60 p-5 sm:p-6">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-navy/70">Coverage</h2>

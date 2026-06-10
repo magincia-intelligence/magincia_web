@@ -1,59 +1,93 @@
 import type { Metadata } from "next";
-import EnrolmentsExplorer from "./EnrolmentsExplorer";
-import { getFilterOptions, getSeries, type FilterOptions, type SeriesPoint } from "@/lib/intelligence";
+import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Market Intelligence — Australian International Education",
+  title: "Market Intelligence — Australian Education",
   description:
-    "Interactive visualisation of Australian international student enrolments and commencements over time, filterable by sector, source country, state, and provider type.",
+    "Data tools across Australian education: international student enrolments, mobility country reports, domestic education, and early childhood education and care (ECEC).",
   alternates: { canonical: "/intelligence" },
 };
 
-// Rebuild at most hourly; the underlying data changes ~monthly.
-export const revalidate = 3600;
+type Section = {
+  href: string;
+  eyebrow: string;
+  title: string;
+  blurb: string;
+  status: "live" | "soon";
+};
 
-export default async function IntelligencePage() {
-  let options: FilterOptions | null = null;
-  let initialSeries: SeriesPoint[] = [];
-  try {
-    [options, initialSeries] = await Promise.all([getFilterOptions(), getSeries({})]);
-  } catch (err) {
-    console.error("intelligence page load failed:", err);
-  }
+const SECTIONS: Section[] = [
+  {
+    href: "/intelligence/international-education",
+    eyebrow: "Live",
+    title: "International Education",
+    blurb:
+      "Australian international student enrolments and commencements since 2005 — by sector, source country, state, and provider, with year-on-year comparison and projection.",
+    status: "live",
+  },
+  {
+    href: "/intelligence/mobility",
+    eyebrow: "Live",
+    title: "Mobility Country Reports",
+    blurb:
+      "Per-country supply and demand for international student mobility — domestic education quality and capacity versus the drivers to study abroad, benchmarked globally.",
+    status: "live",
+  },
+  {
+    href: "/intelligence/domestic-education",
+    eyebrow: "In development",
+    title: "Domestic Education",
+    blurb:
+      "Australian domestic enrolments, attainment, and participation across higher education and VET — the home-market context for the international sector.",
+    status: "soon",
+  },
+  {
+    href: "/intelligence/early-education",
+    eyebrow: "In development",
+    title: "Early Education (ECEC)",
+    blurb:
+      "Early childhood education and care — participation, provider supply, and workforce across the Australian ECEC sector.",
+    status: "soon",
+  },
+];
 
+export default function IntelligenceHub() {
   return (
-    <main className="w-full max-w-6xl mx-auto px-6 py-16 sm:py-24">
+    <main className="mx-auto w-full max-w-5xl px-6 py-16 sm:py-24">
       <span className="inline-flex items-center rounded-full bg-vermillion px-3 py-1 text-xs font-semibold uppercase tracking-widest text-cream">
         Market Intelligence
       </span>
-
-      <h1 className="mt-6 text-3xl sm:text-5xl font-semibold tracking-tight text-navy">
-        International student enrolments
+      <h1 className="mt-6 text-3xl font-semibold tracking-tight text-navy sm:text-5xl">
+        Australian education, in data
       </h1>
-      <p className="mt-4 text-lg text-navy/80 leading-snug">
-        Year-to-date enrolments and commencements for international students in
-        Australia, from 2005 to the latest monthly release. Filter by sector,
-        source country, state, and provider type.
+      <p className="mt-4 max-w-3xl text-lg leading-snug text-navy/80">
+        Interactive tools across the education market — from international student
+        flows into Australia to the supply and demand shaping global student
+        mobility. Choose an area to explore.
       </p>
 
-      {options ? (
-        <EnrolmentsExplorer options={options} initialSeries={initialSeries} />
-      ) : (
-        <div className="mt-8 rounded-xl border border-navy/10 bg-white/60 p-6 text-navy/70">
-          The data is temporarily unavailable. Please check back shortly.
-        </div>
-      )}
-
-      <p className="mt-6 text-sm text-navy/60">
-        Source:{" "}
-        <a
-          className="text-vermillion hover:underline"
-          href="https://www.education.gov.au/international-education-data-and-research/international-student-monthly-summary-and-data-tables"
-        >
-          Australian Department of Education — International Student Monthly Summary
-        </a>
-        . Updated daily.
-      </p>
+      <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2">
+        {SECTIONS.map((s) => (
+          <Link
+            key={s.href}
+            href={s.href}
+            className="group flex flex-col rounded-2xl border border-navy/10 bg-white/70 p-6 transition-colors hover:border-vermillion/40"
+          >
+            <span
+              className={`text-xs font-semibold uppercase tracking-widest ${
+                s.status === "live" ? "text-vermillion" : "text-navy/40"
+              }`}
+            >
+              {s.eyebrow}
+            </span>
+            <h2 className="mt-2 text-xl font-semibold text-navy sm:text-2xl">{s.title}</h2>
+            <p className="mt-2 flex-1 text-sm text-navy/70">{s.blurb}</p>
+            <span className="mt-4 text-sm text-blue transition-colors group-hover:text-vermillion">
+              {s.status === "live" ? "Explore →" : "Preview →"}
+            </span>
+          </Link>
+        ))}
+      </div>
     </main>
   );
 }

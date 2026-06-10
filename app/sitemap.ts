@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { getAllBriefs, getBriefsByMonth } from "@/lib/briefs";
+import { TOP_SOURCE_MARKETS } from "@/lib/mobility";
 
 const SITE = "https://magincia.ai";
 
@@ -34,6 +35,23 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.6,
     },
+    ...[
+      "international-education",
+      "mobility",
+      "domestic-education",
+      "early-education",
+    ].map((slug) => ({
+      url: `${SITE}/intelligence/${slug}`,
+      lastModified: today,
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
+    })),
+    ...TOP_SOURCE_MARKETS.map((m) => ({
+      url: `${SITE}/intelligence/mobility/${m.iso3.toLowerCase()}`,
+      lastModified: today,
+      changeFrequency: "monthly" as const,
+      priority: 0.5,
+    })),
     ...months.map((m) => ({
       url: `${SITE}/archive/${m.month}`,
       lastModified: m.briefs[0]?.date ?? today,

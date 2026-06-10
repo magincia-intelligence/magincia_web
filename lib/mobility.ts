@@ -243,33 +243,6 @@ export async function getSupplyDemandSeries(iso3: string): Promise<IndexPoint[]>
   return [...byYear.values()].sort((a, b) => a.year - b.year);
 }
 
-// ---- World choropleth data ----------------------------------------------
-export type IndexMapData = {
-  years: number[];
-  supply: Record<number, Record<string, number>>;
-  demand: Record<number, Record<string, number>>;
-};
-
-/** All countries' supply & demand index by year, for the world choropleth. */
-export async function getIndexMapData(): Promise<IndexMapData> {
-  const { rows } = await getPool().query(
-    `select v.year_key as year, v.axis, d.iso3, v.index_score
-       from mobility.vw_country_axis_index v
-       join mobility.dim_country d on d.country_key = v.country_key
-      order by v.year_key`,
-  );
-  const supply: Record<number, Record<string, number>> = {};
-  const demand: Record<number, Record<string, number>> = {};
-  const years = new Set<number>();
-  for (const r of rows) {
-    const y = Number(r.year);
-    years.add(y);
-    const bucket = r.axis === "supply" ? supply : demand;
-    (bucket[y] ??= {})[(r.iso3 as string).trim()] = Number(r.index_score);
-  }
-  return { years: [...years].sort((a, b) => a - b), supply, demand };
-}
-
 /**
  * Resolve an ISO3 to the AU DoE nationality label (via the bridge), but only if
  * that label actually has enrolment data in the gold mart. Returns null when the

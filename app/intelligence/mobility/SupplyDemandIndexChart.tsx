@@ -26,15 +26,21 @@ export default function SupplyDemandIndexChart({ points }: { points: IndexPoint[
     const span = Math.max(1, maxY - minY);
     const xOf = (y: number) => M.left + ((y - minY) / span) * innerW;
     const yOf = (v: number) => M.top + innerH - (v / 100) * innerH;
-    const pathFor = (key: "supply" | "demand") => {
-      let d = "", started = false;
-      for (const p of points) {
-        const v = p[key];
-        if (v === null) { started = false; continue; }
-        d += `${started ? "L" : "M"}${xOf(p.year).toFixed(1)},${yOf(v).toFixed(1)}`;
-        started = true;
+    // Returns two paths: a solid line between consecutive years, and a dotted
+    // line that bridges gaps (so missing years connect, but visibly distinct).
+    const lineFor = (key: "supply" | "demand") => {
+      const pts = points
+        .filter((p) => p[key] !== null)
+        .map((p) => ({ x: xOf(p.year), y: yOf(p[key] as number), year: p.year }));
+      if (!pts.length) return { solid: "", dotted: "" };
+      const dotted = pts.map((p, i) => `${i ? "L" : "M"}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join("");
+      let solid = "";
+      for (let i = 1; i < pts.length; i++) {
+        if (pts[i].year - pts[i - 1].year === 1) {
+          solid += `M${pts[i - 1].x.toFixed(1)},${pts[i - 1].y.toFixed(1)}L${pts[i].x.toFixed(1)},${pts[i].y.toFixed(1)}`;
+        }
       }
-      return d;
+      return { solid, dotted };
     };
     const lastOf = (key: "supply" | "demand") => {
       for (let i = points.length - 1; i >= 0; i--) if (points[i][key] !== null) return points[i];
@@ -44,13 +50,15 @@ export default function SupplyDemandIndexChart({ points }: { points: IndexPoint[
     const ticks: number[] = [];
     for (let y = minY; y <= maxY; y++) if (y % 5 === 0) ticks.push(y);
     if (ticks[ticks.length - 1] !== maxY) ticks.push(maxY);
-    return { minY, maxY, span, xOf, yOf, pathFor, lastOf, ticks };
+    return { minY, maxY, span, xOf, yOf, lineFor, lastOf, ticks };
   }, [points]);
 
   if (!model) {
     return <p className="py-8 text-center text-sm text-navy/60">Not enough history to chart an index.</p>;
   }
-  const { minY, maxY, xOf, yOf, pathFor, lastOf, ticks } = model;
+  const { minY, maxY, xOf, yOf, lineFor, lastOf, ticks } = model;
+  const supLine = lineFor("supply");
+  const demLine = lineFor("demand");
   const lastS = lastOf("supply");
   const lastD = lastOf("demand");
   const hovered = hoverYear === null ? null : points.find((p) => p.year === hoverYear) ?? null;
@@ -94,9 +102,11 @@ export default function SupplyDemandIndexChart({ points }: { points: IndexPoint[
         <text key={y} x={xOf(y)} y={M.top + innerH + 18} textAnchor="middle" fontSize="11" fill={NAVY} fillOpacity="0.55">{y}</text>
       ))}
 
-      {/* lines */}
-      <path d={pathFor("supply")} fill="none" stroke={BLUE} strokeWidth="2.5" strokeLinejoin="round" />
-      <path d={pathFor("demand")} fill="none" stroke={VERM} strokeWidth="2.5" strokeLinejoin="round" />
+      {/* lines — dotted bridges gaps, solid between consecutive years */}
+      <path d={supLine.dotted} fill="none" stroke={BLUE} strokeWidth="1.75" strokeOpacity="0.65" strokeDasharray="2 3" />
+      <path d={supLine.solid} fill="none" stroke={BLUE} strokeWidth="2.5" strokeLinejoin="round" />
+      <path d={demLine.dotted} fill="none" stroke={VERM} strokeWidth="1.75" strokeOpacity="0.65" strokeDasharray="2 3" />
+      <path d={demLine.solid} fill="none" stroke={VERM} strokeWidth="2.5" strokeLinejoin="round" />
 
       {/* end labels */}
       {lastS && lastS.supply !== null && (

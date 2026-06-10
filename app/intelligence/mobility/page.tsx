@@ -34,24 +34,6 @@ export default function MobilityIndexPage() {
         report benchmarks a country against the world across eight open indicators.
       </p>
 
-      {/* World map */}
-      <Link
-        href="/intelligence/mobility/map"
-        className="group mt-8 flex items-center justify-between gap-4 rounded-2xl border border-navy/10 bg-white/70 p-5 transition-colors hover:border-vermillion/40 sm:p-6"
-      >
-        <div>
-          <div className="text-xs font-semibold uppercase tracking-widest text-blue">Interactive</div>
-          <h2 className="mt-1 text-xl font-semibold text-navy sm:text-2xl">World map, over time</h2>
-          <p className="mt-1 max-w-2xl text-sm text-navy/70">
-            A choropleth of supply and demand across every country, with a year slider — watch two
-            decades of change.
-          </p>
-        </div>
-        <span className="shrink-0 text-sm text-blue transition-colors group-hover:text-vermillion">
-          Open map →
-        </span>
-      </Link>
-
       {/* Featured: China */}
       <Link
         href={`/intelligence/mobility/${featured.iso3.toLowerCase()}`}

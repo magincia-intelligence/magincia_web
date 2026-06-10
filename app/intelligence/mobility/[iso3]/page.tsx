@@ -62,6 +62,7 @@ const INDICATOR_BLURB: Record<string, string> = {
   TERTIARY_GER: "Tertiary gross enrolment ratio — domestic capacity.",
   OUTBOUND_MOBILITY: "Tertiary students studying abroad, as a share of enrolment.",
   GDP_PCAP_PPP: "GDP per capita, PPP — ability to pay.",
+  POP_TOTAL: "Total population — scale of the student market.",
   YOUTH_15_24: "Population aged 15–24 — the demand pool.",
 };
 
@@ -73,6 +74,7 @@ const CODE_LABEL: Record<string, string> = {
   TERTIARY_GER: "Tertiary Enrolment Ratio",
   OUTBOUND_MOBILITY: "Outbound Mobility Ratio",
   GDP_PCAP_PPP: "GDP per Capita (PPP)",
+  POP_TOTAL: "Population (market scale)",
   YOUTH_15_24: "Youth Population (15–24)",
 };
 
@@ -94,6 +96,11 @@ function IndicatorRow({ item, accent }: { item: IndicatorReport; accent: string 
       <div className="flex items-baseline justify-between gap-3">
         <div className="min-w-0">
           <span className="font-medium text-navy">{CODE_LABEL[item.code] ?? item.name}</span>
+          {!item.inIndex && (
+            <span className="ml-2 rounded bg-navy/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-navy/45">
+              context
+            </span>
+          )}
           <span className="ml-2 text-xs text-navy/50">{item.year}</span>
         </div>
         <div className="flex items-baseline gap-3 whitespace-nowrap">
@@ -148,7 +155,7 @@ function AxisCard({
             {score.score ?? "—"}
           </div>
           <div className="text-[11px] uppercase tracking-wide text-navy/50">
-            over {score.nPresent}/{score.nTotal} indic.
+            {score.score === null ? "no index" : `index · ${score.year}`}
           </div>
         </div>
       </div>
@@ -215,26 +222,33 @@ export default async function MobilityCountryPage({
           <span className="font-semibold text-blue">supply</span> of domestic education (quality and
           capacity at home) and the{" "}
           <span className="font-semibold text-vermillion">demand</span> drivers (who wants to leave,
-          and who can afford to). Each indicator is scored 0–100 by its global percentile.
+          and who can afford to). The headline index for each axis is the mean percentile — versus
+          every country that year — of a fixed core basket; other indicators are shown as{" "}
+          <span className="font-medium">context</span>.
         </p>
       </header>
 
       <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
         <AxisCard
           title="Supply — domestic education"
-          subtitle="Higher scores = stronger home system. Weak supply itself drives students abroad."
+          subtitle="Index = Education Index + tertiary enrolment. Weak supply itself drives students abroad."
           items={supply}
           score={supplyScore}
           accent={BLUE}
         />
         <AxisCard
           title="Demand — drivers to study abroad"
-          subtitle="Outbound appetite, ability to pay, and the size of the youth cohort."
+          subtitle="Index = GDP per capita + outbound mobility + population (market scale)."
           items={demand}
           score={demandScore}
           accent={VERMILLION}
         />
       </div>
+      <p className="mt-3 text-xs text-navy/50">
+        The headline index uses the core basket only, so it stays comparable across countries and
+        matches the trend chart and world map below. PISA (≈80 countries, triennial) is shown as
+        context, not in the index.
+      </p>
 
       {indexSeries.length >= 2 && (
         <section className="mt-8 rounded-2xl border border-navy/10 bg-white/70 p-5 sm:p-6">
@@ -254,7 +268,7 @@ export default async function MobilityCountryPage({
           </div>
           <p className="mt-2 text-xs text-navy/50">
             Index basket (held constant for comparability): supply = Education Index + tertiary
-            enrolment ratio; demand = GDP per capita (PPP) + outbound mobility ratio.
+            enrolment ratio; demand = GDP per capita (PPP) + outbound mobility ratio + population.
           </p>
         </section>
       )}

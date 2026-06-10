@@ -29,11 +29,17 @@ export type IndicatorReport = {
   unit: string | null;
   year: number;
   globalPercentile: number | null; // 0..1
-  score: number | null; // round(globalPercentile * 100)
+  score: number | null; // 0..100
   regionAvg: number | null;
+  inIndex: boolean; // part of the headline index core basket
 };
 
-export type AxisScore = { score: number | null; nPresent: number; nTotal: number };
+export type AxisScore = {
+  score: number | null;
+  year: number | null;
+  nPresent: number;
+  nTotal: number;
+};
 
 export type CountryReport = {
   country: {
@@ -50,20 +56,24 @@ export type CountryReport = {
   demandScore: AxisScore;
 };
 
-// The 8-indicator registry (kept in sync with mobility.dim_indicator).
+// Indicators shown on the report. AXIS_OF drives display; CORE is the fixed
+// index basket (matches mobility.vw_country_axis_index). PISA stays as context
+// (sparse, ~84 countries); youth-15-24 is dropped (stale) in favour of
+// POP_TOTAL as the continuously-available demand-scale driver.
 export const AXIS_OF: Record<string, Axis> = {
   EDU_INDEX: "supply",
   PISA_MATH: "supply",
   PISA_READ: "supply",
   PISA_SCI: "supply",
   TERTIARY_GER: "supply",
-  OUTBOUND_MOBILITY: "demand",
   GDP_PCAP_PPP: "demand",
-  YOUTH_15_24: "demand",
+  OUTBOUND_MOBILITY: "demand",
+  POP_TOTAL: "demand",
 };
+const CORE = new Set(["EDU_INDEX", "TERTIARY_GER", "GDP_PCAP_PPP", "OUTBOUND_MOBILITY", "POP_TOTAL"]);
 const ALL_CODES = Object.keys(AXIS_OF);
-const SUPPLY_TOTAL = ALL_CODES.filter((c) => AXIS_OF[c] === "supply").length;
-const DEMAND_TOTAL = ALL_CODES.filter((c) => AXIS_OF[c] === "demand").length;
+const SUPPLY_CORE = 2; // EDU_INDEX + TERTIARY_GER
+const DEMAND_CORE = 3; // GDP_PCAP_PPP + OUTBOUND_MOBILITY + POP_TOTAL
 
 // ---- Query --------------------------------------------------------------
 /** Build a per-country supply/demand report, or null if the country is unknown. */
@@ -79,39 +89,80 @@ export async function getCountryReport(iso3: string): Promise<CountryReport | nu
   if (meta.rowCount === 0) return null;
   const m = meta.rows[0];
 
-  const { rows } = await pool.query(
+  // Per-indicator latest value + vs-world percentile (context / fallback).
+  const baseRows = await pool.query(
     `select indicator_code, indicator_name, axis, unit, value, year,
             global_percentile, region_avg
        from mobility.vw_country_indicator_report
-      where iso3 = $1
-      order by axis, indicator_code`,
+      where iso3 = $1`,
     [code],
   );
+
+  // Headline index per axis (within-year core basket) — the SAME number the
+  // trend chart and world map use, so the page can't contradict them.
+  const idxRes = await pool.query(
+    `select distinct on (v.axis) v.axis, v.year_key, v.index_score
+       from mobility.vw_country_axis_index v
+       join mobility.dim_country d on d.country_key = v.country_key
+      where d.iso3 = $1
+      order by v.axis, v.year_key desc`,
+    [code],
+  );
+  const axisIdx: Record<string, { score: number; year: number }> = {};
+  for (const r of idxRes.rows) axisIdx[r.axis] = { score: Number(r.index_score), year: Number(r.year_key) };
+
+  // Core indicators evaluated at the index year (within-year percentile), so the
+  // listed core rows reconcile with the headline index.
+  const supY = axisIdx.supply?.year ?? -1;
+  const demY = axisIdx.demand?.year ?? -1;
+  const coreByCode: Record<string, { value: number; year: number; score: number }> = {};
+  if (supY > 0 || demY > 0) {
+    const cr = await pool.query(
+      `select i.indicator_code, f.value, p.year_key, round(p.pct * 100) as score
+         from mobility.vw_indicator_percentile p
+         join mobility.dim_indicator i on i.indicator_key = p.indicator_key
+         join mobility.fact_indicator_value f
+           on f.country_key = p.country_key and f.indicator_key = p.indicator_key and f.year_key = p.year_key
+         join mobility.dim_country d on d.country_key = p.country_key
+        where d.iso3 = $1
+          and ((i.axis = 'supply' and p.year_key = $2) or (i.axis = 'demand' and p.year_key = $3))
+          and i.indicator_code = any($4)`,
+      [code, supY, demY, [...CORE]],
+    );
+    for (const r of cr.rows)
+      coreByCode[r.indicator_code] = { value: Number(r.value), year: Number(r.year_key), score: Number(r.score) };
+  }
 
   const supply: IndicatorReport[] = [];
   const demand: IndicatorReport[] = [];
   const present = new Set<string>();
 
-  for (const r of rows) {
-    present.add(r.indicator_code);
+  for (const r of baseRows.rows) {
+    const c = r.indicator_code as string;
+    if (!(c in AXIS_OF)) continue; // skip indicators not shown (e.g. YOUTH_15_24)
+    present.add(c);
+    const inIndex = CORE.has(c);
+    const ov = inIndex ? coreByCode[c] : undefined;
     const pct = r.global_percentile === null ? null : Number(r.global_percentile);
     const item: IndicatorReport = {
-      code: r.indicator_code,
+      code: c,
       name: r.indicator_name,
-      value: Number(r.value),
+      value: ov ? ov.value : Number(r.value),
       unit: r.unit,
-      year: Number(r.year),
-      globalPercentile: pct,
-      score: pct === null ? null : Math.round(pct * 100),
-      regionAvg: r.region_avg === null ? null : Number(r.region_avg),
+      year: ov ? ov.year : Number(r.year),
+      globalPercentile: ov ? ov.score / 100 : pct,
+      score: ov ? ov.score : pct === null ? null : Math.round(pct * 100),
+      regionAvg: inIndex ? null : r.region_avg === null ? null : Number(r.region_avg),
+      inIndex,
     };
-    (r.axis === "supply" ? supply : demand).push(item);
+    (AXIS_OF[c] === "supply" ? supply : demand).push(item);
   }
 
-  const mean = (xs: number[]) =>
-    xs.length ? Math.round((xs.reduce((a, b) => a + b, 0) / xs.length) * 10) / 10 : null;
-  const sScores = supply.map((i) => i.score).filter((s): s is number => s !== null);
-  const dScores = demand.map((i) => i.score).filter((s): s is number => s !== null);
+  // core indicators first, then by score desc
+  const order = (a: IndicatorReport, b: IndicatorReport) =>
+    Number(b.inIndex) - Number(a.inIndex) || (b.score ?? -1) - (a.score ?? -1);
+  supply.sort(order);
+  demand.sort(order);
 
   return {
     country: {
@@ -129,8 +180,18 @@ export async function getCountryReport(iso3: string): Promise<CountryReport | nu
       nPresent: present.size,
       nTotal: ALL_CODES.length,
     },
-    supplyScore: { score: mean(sScores), nPresent: sScores.length, nTotal: SUPPLY_TOTAL },
-    demandScore: { score: mean(dScores), nPresent: dScores.length, nTotal: DEMAND_TOTAL },
+    supplyScore: {
+      score: axisIdx.supply?.score ?? null,
+      year: axisIdx.supply?.year ?? null,
+      nPresent: supY > 0 ? SUPPLY_CORE : 0,
+      nTotal: SUPPLY_CORE,
+    },
+    demandScore: {
+      score: axisIdx.demand?.score ?? null,
+      year: axisIdx.demand?.year ?? null,
+      nPresent: demY > 0 ? DEMAND_CORE : 0,
+      nTotal: DEMAND_CORE,
+    },
   };
 }
 
@@ -180,6 +241,33 @@ export async function getSupplyDemandSeries(iso3: string): Promise<IndexPoint[]>
     else p.demand = Number(r.index_score);
   }
   return [...byYear.values()].sort((a, b) => a.year - b.year);
+}
+
+// ---- World choropleth data ----------------------------------------------
+export type IndexMapData = {
+  years: number[];
+  supply: Record<number, Record<string, number>>;
+  demand: Record<number, Record<string, number>>;
+};
+
+/** All countries' supply & demand index by year, for the world choropleth. */
+export async function getIndexMapData(): Promise<IndexMapData> {
+  const { rows } = await getPool().query(
+    `select v.year_key as year, v.axis, d.iso3, v.index_score
+       from mobility.vw_country_axis_index v
+       join mobility.dim_country d on d.country_key = v.country_key
+      order by v.year_key`,
+  );
+  const supply: Record<number, Record<string, number>> = {};
+  const demand: Record<number, Record<string, number>> = {};
+  const years = new Set<number>();
+  for (const r of rows) {
+    const y = Number(r.year);
+    years.add(y);
+    const bucket = r.axis === "supply" ? supply : demand;
+    (bucket[y] ??= {})[(r.iso3 as string).trim()] = Number(r.index_score);
+  }
+  return { years: [...years].sort((a, b) => a - b), supply, demand };
 }
 
 /**

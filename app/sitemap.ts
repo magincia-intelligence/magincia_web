@@ -38,6 +38,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...[
       "international-education",
       "mobility",
+      "mobility/map",
       "domestic-education",
       "early-education",
     ].map((slug) => ({

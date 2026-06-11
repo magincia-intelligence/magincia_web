@@ -24,7 +24,7 @@ export default async function DomesticEducationPage() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-6 py-16 sm:py-24">
+    <main className="mx-auto w-full max-w-6xl px-6 sm:px-8 lg:px-10 py-16 sm:py-24">
       <Link href="/intelligence" className="text-sm text-blue transition-colors hover:text-vermillion">
         ← Intelligence
       </Link>

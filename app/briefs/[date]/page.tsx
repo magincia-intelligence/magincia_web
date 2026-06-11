@@ -119,7 +119,7 @@ export default async function BriefPage({
   };
 
   return (
-    <main className="w-full max-w-3xl mx-auto px-6 py-16">
+    <main className="w-full max-w-3xl mx-auto px-6 sm:px-8 lg:px-10 py-16">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(newsArticleJsonLd) }}

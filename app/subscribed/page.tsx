@@ -43,7 +43,7 @@ export default async function SubscribedPage({
         : STATES.success;
 
   return (
-    <main className="w-full max-w-2xl mx-auto px-6 py-20 sm:py-28 text-center">
+    <main className="w-full max-w-2xl mx-auto px-6 sm:px-8 lg:px-10 py-20 sm:py-28 text-center">
       <span className="inline-flex items-center rounded-full bg-vermillion px-3 py-1 text-xs font-semibold uppercase tracking-widest text-cream">
         {state.badge}
       </span>

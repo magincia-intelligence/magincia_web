@@ -34,7 +34,7 @@ export default function Home() {
         <SearchBox />
       </section>
 
-      <section className="w-full max-w-3xl px-6 py-12 sm:py-16">
+      <section className="w-full max-w-3xl px-6 sm:px-8 lg:px-10 py-12 sm:py-16">
         <h2 className="text-2xl sm:text-3xl font-semibold text-navy">
           Daily Briefs
         </h2>
@@ -88,7 +88,7 @@ export default function Home() {
         )}
       </section>
 
-      <section className="w-full flex flex-col items-center border-t border-navy/10 px-6 py-12 sm:py-16 text-center">
+      <section className="w-full flex flex-col items-center border-t border-navy/10 px-6 sm:px-8 lg:px-10 py-12 sm:py-16 text-center">
         <h2 className="text-2xl sm:text-3xl font-semibold text-navy">
           Subscribe to the Daily Brief
         </h2>

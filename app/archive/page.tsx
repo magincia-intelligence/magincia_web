@@ -13,7 +13,7 @@ export default function ArchivePage() {
   const months = getBriefsByMonth();
 
   return (
-    <main className="w-full max-w-3xl mx-auto px-6 py-16">
+    <main className="w-full max-w-3xl mx-auto px-6 sm:px-8 lg:px-10 py-16">
       <Link
         href="/"
         className="text-sm text-blue hover:text-vermillion transition-colors"

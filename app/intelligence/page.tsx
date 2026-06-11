@@ -53,7 +53,7 @@ const SECTIONS: Section[] = [
 
 export default function IntelligenceHub() {
   return (
-    <main className="mx-auto w-full max-w-5xl px-6 py-16 sm:py-24">
+    <main className="mx-auto w-full max-w-5xl px-6 sm:px-8 lg:px-10 py-16 sm:py-24">
       <span className="inline-flex items-center rounded-full bg-vermillion px-3 py-1 text-xs font-semibold uppercase tracking-widest text-cream">
         Market Intelligence
       </span>

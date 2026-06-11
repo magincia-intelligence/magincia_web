@@ -117,7 +117,7 @@ export default function RootLayout({
         />
         <SiteHeader />
         <div className="flex flex-1 flex-col">{children}</div>
-        <footer className="w-full border-t border-navy/10 bg-cream px-6 py-10 text-xs leading-relaxed text-navy/55">
+        <footer className="w-full border-t border-navy/10 bg-cream px-6 sm:px-8 lg:px-10 py-10 text-xs leading-relaxed text-navy/55">
           <div className="mx-auto max-w-3xl space-y-3">
             <p>
               <span className="font-semibold uppercase tracking-widest text-vermillion">

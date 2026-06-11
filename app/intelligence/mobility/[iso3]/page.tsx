@@ -201,7 +201,7 @@ export default async function MobilityCountryPage({
     .join(" · ");
 
   return (
-    <main className="mx-auto w-full max-w-5xl px-6 py-16 sm:py-20">
+    <main className="mx-auto w-full max-w-5xl px-6 sm:px-8 lg:px-10 py-16 sm:py-20">
       <Link
         href="/intelligence/mobility"
         className="text-sm text-blue transition-colors hover:text-vermillion"

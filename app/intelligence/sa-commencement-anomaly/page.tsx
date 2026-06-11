@@ -260,7 +260,7 @@ function ChartCard({ title, sub, children }: { title: string; sub?: string; chil
 
 export default function SaCommencementAnomalyPage() {
   return (
-    <main className="mx-auto w-full max-w-4xl px-6 py-16 sm:px-10 sm:py-20">
+    <main className="mx-auto w-full max-w-5xl px-6 py-16 sm:px-8 sm:py-20 lg:px-10">
       <Link href="/intelligence" className="text-sm text-blue transition-colors hover:text-vermillion">
         ← Intelligence
       </Link>
@@ -269,10 +269,10 @@ export default function SaCommencementAnomalyPage() {
         Case Study · February 2026
       </span>
 
-      <h1 className="mt-6 text-3xl sm:text-5xl font-semibold tracking-tight text-navy">
+      <h1 className="mt-6 max-w-3xl text-3xl sm:text-5xl font-semibold tracking-tight text-navy">
         The South Australian commencement anomaly
       </h1>
-      <p className="mt-4 text-lg text-navy/80 leading-snug">
+      <p className="mt-4 max-w-3xl text-lg text-navy/80 leading-snug">
         International <strong>Higher Degree by Research</strong> commencements in South Australia jumped roughly
         tenfold in February 2026 — from 143 to 1,466. On the surface it looks like an extraordinary recruitment
         win. It is the opposite: a statistical artifact of the Adelaide University merger, recorded at the very
@@ -286,8 +286,8 @@ export default function SaCommencementAnomalyPage() {
         <Stat value="~840" label="SA research student visas granted in the latest year — essentially flat" accent={BLUE} />
       </div>
 
-      <h2 className="mt-12 text-2xl font-semibold tracking-tight text-navy">The anomaly</h2>
-      <p className="mt-3 text-navy/80 leading-relaxed">
+      <h2 className="mt-12 max-w-3xl text-2xl font-semibold tracking-tight text-navy">The anomaly</h2>
+      <p className="mt-3 max-w-3xl text-navy/80 leading-relaxed">
         Adelaide University — the merger of the University of Adelaide and the University of South Australia —
         began operating on 1 January 2026. A <em>commencement</em> in the Department of Education&rsquo;s data is
         triggered whenever a student starts or changes a programme. Migrating every continuing student into a new
@@ -302,8 +302,8 @@ export default function SaCommencementAnomalyPage() {
         <ResearchSpikeChart />
       </ChartCard>
 
-      <h2 className="mt-12 text-2xl font-semibold tracking-tight text-navy">It isn&rsquo;t new students</h2>
-      <p className="mt-3 text-navy/80 leading-relaxed">
+      <h2 className="mt-12 max-w-3xl text-2xl font-semibold tracking-tight text-navy">It isn&rsquo;t new students</h2>
+      <p className="mt-3 max-w-3xl text-navy/80 leading-relaxed">
         Splitting commencements by whether the student was already in Australia is decisive. Of the 1,466 research
         commencements in February 2026, <strong>1,323 (90%) were students already onshore</strong> — continuing
         candidates, not arrivals. New research arrivals stayed flat (70 → 143). Continuing students don&rsquo;t need
@@ -316,10 +316,10 @@ export default function SaCommencementAnomalyPage() {
         <ContinuingByLevelChart />
       </ChartCard>
 
-      <h2 className="mt-12 text-2xl font-semibold tracking-tight text-navy">
+      <h2 className="mt-12 max-w-3xl text-2xl font-semibold tracking-tight text-navy">
         It pervades every level — but hides in the totals
       </h2>
-      <p className="mt-3 text-navy/80 leading-relaxed">
+      <p className="mt-3 max-w-3xl text-navy/80 leading-relaxed">
         Here is the subtle part. The re-commencement of continuing students happened across <em>every</em> level —
         onshore commencements rose +133% for coursework masters and +39% for bachelors, not just in research. Yet
         the <em>headline totals</em> for those levels barely moved (Masters Coursework +4%, Bachelor −3%). The
@@ -360,14 +360,14 @@ export default function SaCommencementAnomalyPage() {
           </tbody>
         </table>
       </div>
-      <p className="mt-2 text-xs text-navy/55">
+      <p className="mt-2 max-w-3xl text-xs text-navy/55">
         Continuing = already in Australia (new_to_australia = No); new arrivals = new_to_australia = Yes.
         South Australia, Higher Education, February year-to-date. Counts under 5 are perturbed per the
         de-identification rule.
       </p>
 
-      <h2 className="mt-12 text-2xl font-semibold tracking-tight text-navy">The visa cross-check</h2>
-      <p className="mt-3 text-navy/80 leading-relaxed">
+      <h2 className="mt-12 max-w-3xl text-2xl font-semibold tracking-tight text-navy">The visa cross-check</h2>
+      <p className="mt-3 max-w-3xl text-navy/80 leading-relaxed">
         If 1,466 research students had genuinely commenced, South Australia would have needed a comparable surge in
         postgraduate-research student visa grants. There was none. Grants have sat at roughly 450–1,000 a year for a
         decade, and the most recent full year was ~840 — nowhere near the commencement figure. The gap is the
@@ -380,8 +380,8 @@ export default function SaCommencementAnomalyPage() {
         <VisaCrossCheckChart />
       </ChartCard>
 
-      <h2 className="mt-12 text-2xl font-semibold tracking-tight text-navy">How much does it skew the sector totals?</h2>
-      <p className="mt-3 text-navy/80 leading-relaxed">
+      <h2 className="mt-12 max-w-3xl text-2xl font-semibold tracking-tight text-navy">How much does it skew the sector totals?</h2>
+      <p className="mt-3 max-w-3xl text-navy/80 leading-relaxed">
         The artifact is one state. Every other state&rsquo;s continuing-commencement count moved normally in 2026;
         South Australia&rsquo;s leapt by ~2,400. That gap <em>is</em> the merger.
       </p>
@@ -392,7 +392,7 @@ export default function SaCommencementAnomalyPage() {
         <ByStateChart />
       </ChartCard>
 
-      <p className="mt-6 text-navy/80 leading-relaxed">
+      <p className="mt-6 max-w-3xl text-navy/80 leading-relaxed">
         Taking the abnormal South Australian onshore gain as the artifact (~2,300–2,450 commencements; point
         estimate ~2,400), the effect on the headline sector figures is:
       </p>
@@ -414,16 +414,16 @@ export default function SaCommencementAnomalyPage() {
           </p>
         </div>
       </div>
-      <p className="mt-3 text-xs text-navy/55">
+      <p className="mt-3 max-w-3xl text-xs text-navy/55">
         Other sectors (VET, Schools, ELICOS) are unaffected — the merger involves two universities, so the
         distortion is confined to Higher Education. Estimate range ~2,250–2,650; the conservative figure is used.
       </p>
 
-      <h2 className="mt-12 text-2xl font-semibold tracking-tight text-navy">What the coverage says</h2>
-      <p className="mt-3 text-navy/80 leading-relaxed">
+      <h2 className="mt-12 max-w-3xl text-2xl font-semibold tracking-tight text-navy">What the coverage says</h2>
+      <p className="mt-3 max-w-3xl text-navy/80 leading-relaxed">
         The press has reported the <em>real-world</em> side of this — and, in one case, the data distortion itself:
       </p>
-      <ul className="mt-4 space-y-3 text-navy/80">
+      <ul className="mt-4 max-w-3xl space-y-3 text-navy/80">
         <li className="rounded-xl border border-navy/10 bg-white/60 p-4">
           <a className="font-semibold text-vermillion hover:underline"
             href="https://www.indailysa.com.au/news/just-in/2026/06/02/exclusive-adelaide-uni-in-red-as-international-student-numbers-plummet">
@@ -462,15 +462,15 @@ export default function SaCommencementAnomalyPage() {
           </p>
         </li>
       </ul>
-      <p className="mt-4 text-navy/80 leading-relaxed">
+      <p className="mt-4 max-w-3xl text-navy/80 leading-relaxed">
         What has <em>not</em> been reported is the specific mechanism here: that the official international
         <em> commencement</em> statistic for South Australia surged at the same time, driven entirely by continuing
         students being re-commenced. The media has the &ldquo;new students are crashing&rdquo; story; this case study
         supplies the reconciling other half.
       </p>
 
-      <h2 className="mt-12 text-2xl font-semibold tracking-tight text-navy">The takeaway</h2>
-      <p className="mt-3 text-navy/80 leading-relaxed">
+      <h2 className="mt-12 max-w-3xl text-2xl font-semibold tracking-tight text-navy">The takeaway</h2>
+      <p className="mt-3 max-w-3xl text-navy/80 leading-relaxed">
         Any year-on-year read of South Australian international commencements across the 2025→2026 boundary — at{" "}
         <em>any</em> level — is a structural break, not a trend. To recover the real new-student signal, filter to
         new arrivals (<code className="rounded bg-navy/5 px-1 text-sm">new_to_australia = Yes</code>); on that basis
@@ -479,7 +479,7 @@ export default function SaCommencementAnomalyPage() {
       </p>
 
       <footer className="mt-12 border-t border-navy/10 pt-6 text-sm text-navy/60">
-        <p>
+        <p className="max-w-3xl">
           <strong className="text-navy/70">Method &amp; sources.</strong> Figures are a fixed snapshot from the
           Australian Department of Education &ldquo;February 2026 — Latest Data&rdquo; international-student release
           (Higher Education sector, South Australia, February year-to-date), cross-referenced with Department of

@@ -35,11 +35,11 @@ const SECTIONS: Section[] = [
   },
   {
     href: "/intelligence/domestic-education",
-    eyebrow: "In development",
+    eyebrow: "Live",
     title: "Domestic Education",
     blurb:
-      "Australian domestic enrolments, attainment, and participation across higher education and VET — the home-market context for the international sector.",
-    status: "soon",
+      "Australia's school-to-university pipeline by state — secondary retention, undergraduate applications and offers, and university commencements, completions and study load.",
+    status: "live",
   },
   {
     href: "/intelligence/early-education",

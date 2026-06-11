@@ -65,3 +65,16 @@ export type StatePoint = {
   unit: MetricUnit;
   value: number;
 };
+
+// National undergraduate demand by broad Field of Education (no state dimension
+// — the source publishes applications by field only nationally).
+export type FieldDemandRow = {
+  field: string;
+  applications: number;
+  offers: number;
+  offerRate: number; // 0..1
+};
+export type FieldDemand = {
+  year: number;
+  rows: FieldDemandRow[]; // sorted by applications desc
+};

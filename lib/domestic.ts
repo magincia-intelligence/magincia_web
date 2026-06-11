@@ -1,5 +1,5 @@
 import { Pool } from "pg";
-import type { StatePoint } from "@/lib/domestic-meta";
+import type { StatePoint, FieldDemand } from "@/lib/domestic-meta";
 
 // Re-export the client-safe metadata so server code has a single import surface.
 export * from "@/lib/domestic-meta";
@@ -41,4 +41,28 @@ export async function getStateMetrics(): Promise<StatePoint[]> {
     unit: r.unit,
     value: Number(r.value),
   }));
+}
+
+/** National undergraduate applications & offers by broad Field of Education for
+ *  the latest available year. National only — the source does not publish
+ *  state × field, so this is a standalone panel, not crossable with the
+ *  by-state view. */
+export async function getFieldDemand(): Promise<FieldDemand | null> {
+  const sql = `
+    select ref_year, field_of_education, applications, offers, offer_rate
+    from education.vw_ug_applications_offers_by_field
+    where ref_year = (select max(ref_year) from education.vw_ug_applications_offers_by_field)
+      and applications is not null
+    order by applications desc`;
+  const { rows } = await getPool().query(sql);
+  if (!rows.length) return null;
+  return {
+    year: Number(rows[0].ref_year),
+    rows: rows.map((r) => ({
+      field: r.field_of_education,
+      applications: Number(r.applications),
+      offers: Number(r.offers),
+      offerRate: Number(r.offer_rate),
+    })),
+  };
 }

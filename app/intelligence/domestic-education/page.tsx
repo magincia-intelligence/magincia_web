@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import DomesticExplorer from "./DomesticExplorer";
-import { getStateMetrics, type StatePoint } from "@/lib/domestic";
+import FieldDemandPanel from "./FieldDemandPanel";
+import { getStateMetrics, getFieldDemand, type StatePoint, type FieldDemand } from "@/lib/domestic";
 
 export const metadata: Metadata = {
   title: "Domestic Education — Australian Education Intelligence",
@@ -15,8 +16,9 @@ export const revalidate = 86400;
 
 export default async function DomesticEducationPage() {
   let points: StatePoint[] = [];
+  let fieldDemand: FieldDemand | null = null;
   try {
-    points = await getStateMetrics();
+    [points, fieldDemand] = await Promise.all([getStateMetrics(), getFieldDemand()]);
   } catch (err) {
     console.error("domestic education page load failed:", err);
   }
@@ -46,6 +48,23 @@ export default async function DomesticEducationPage() {
         <div className="mt-8 rounded-xl border border-navy/10 bg-white/60 p-6 text-navy/70">
           The data is temporarily unavailable. Please check back shortly.
         </div>
+      )}
+
+      {fieldDemand && (
+        <section className="mt-12">
+          <h2 className="text-xl font-semibold tracking-tight text-navy sm:text-2xl">
+            Demand by discipline
+          </h2>
+          <p className="mt-2 max-w-3xl text-sm leading-snug text-navy/70">
+            Where the national undergraduate demand sits, by field of education —
+            and how readily each field converts applications into offers. Health
+            draws the most applications but has the lowest offer rate, reflecting
+            competitive, capped entry.
+          </p>
+          <div className="mt-5">
+            <FieldDemandPanel data={fieldDemand} />
+          </div>
+        </section>
       )}
 
       <div className="mt-10 rounded-2xl border border-navy/10 bg-white/50 p-6 text-sm leading-relaxed text-navy/65">

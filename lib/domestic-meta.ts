@@ -32,7 +32,7 @@ export const METRICS: MetricMeta[] = [
     note: "Dept of Education — domestic UG offers (continuous series; QLD TAC break excluded)." },
   { key: "ug_offer_rate", label: "Undergraduate offer rate", short: "UG offer rate",
     unit: "percent", stage: "transition",
-    note: "Dept of Education — offers ÷ applications." },
+    note: "Share of domestic undergraduate applicants who received at least one offer (offers ÷ applications). It is typically high (~85–90%): most applicants get an offer for some course somewhere, so it reflects demand-side conversion, not ATAR selectivity or course cut-offs. It varies more by field — e.g. Health is lower, reflecting capped, competitive entry. Source: Dept of Education, Undergraduate Applications & Offers." },
   { key: "he_commencing_ug", label: "Commencing undergraduates", short: "Commencing UG",
     unit: "students", stage: "university",
     note: "Dept of Education HE — commencing UG by institution location (perturbed; not student origin)." },

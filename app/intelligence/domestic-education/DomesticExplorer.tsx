@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import {
   METRICS, STATES, NATIONAL_CODE, type StatePoint, type MetricUnit,
 } from "@/lib/domestic-meta";
+import InfoTip from "./InfoTip";
 
 const NAVY = "#102238";
 const BLUE = "#1E487A";
@@ -252,6 +253,7 @@ export default function DomesticExplorer({ points }: { points: StatePoint[] }) {
         <figure className="rounded-2xl border border-navy/10 bg-white/60 p-5">
           <figcaption className="text-sm font-semibold text-navy">
             {metric.label} by state{latestYear != null ? ` · ${latestYear}` : ""}
+            <InfoTip label={metric.label} text={metric.note} />
           </figcaption>
           <div className="mt-3"><StateBars rows={barRows} unit={metric.unit}
             selected={stateCode} national={nationalLatest} /></div>

@@ -1,4 +1,12 @@
 import type { FieldDemand } from "@/lib/domestic-meta";
+import InfoTip from "./InfoTip";
+
+const OFFER_RATE_NOTE =
+  "The % beside each field is its offer rate — offers ÷ applications. It is " +
+  "typically high (~85–90%) because most applicants get an offer for some course " +
+  "somewhere; it reflects demand-side conversion, not ATAR selectivity. It varies " +
+  "more by field: Health is lowest, reflecting capped, competitive entry " +
+  "(medicine, nursing). Source: Dept of Education, Undergraduate Applications & Offers.";
 
 const NAVY = "#102238";
 const BLUE = "#1E487A";
@@ -22,6 +30,7 @@ export default function FieldDemandPanel({ data }: { data: FieldDemand }) {
     <figure className="rounded-2xl border border-navy/10 bg-white/60 p-5">
       <figcaption className="text-sm font-semibold text-navy">
         Undergraduate applications by field of education — national · {data.year}
+        <InfoTip label="offer rate" text={OFFER_RATE_NOTE} />
       </figcaption>
       <p className="mt-1 text-xs text-navy/55">
         Bar length = applications; filled portion = offers. National only — the

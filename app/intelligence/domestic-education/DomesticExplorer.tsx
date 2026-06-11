@@ -261,6 +261,7 @@ export default function DomesticExplorer({ points }: { points: StatePoint[] }) {
         <figure className="rounded-2xl border border-navy/10 bg-white/60 p-5">
           <figcaption className="text-sm font-semibold text-navy">
             {metric.label} over time — {stateName} vs Australia
+            <InfoTip label={metric.label} text={metric.note} />
           </figcaption>
           <div className="mt-3"><TrendLine state={stateSeries} national={nationalSeries}
             unit={metric.unit} stateLabel={stateCode} /></div>

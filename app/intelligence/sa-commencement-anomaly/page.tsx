@@ -4,7 +4,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "The South Australian Commencement Anomaly — How a University Merger Inflated a Statistic",
   description:
-    "A February 2026 case study: international Higher Degree by Research commencements in South Australia jumped roughly tenfold while genuine new-student arrivals fell. The cause is the Adelaide University merger re-commencing continuing students — a system-wide statistical artifact, not growth.",
+    "A February 2026 case study: international Higher Degree by Research commencements in South Australia jumped roughly tenfold while genuine new-student arrivals fell. The cause is the Adelaide University merger re-commencing continuing students — a system-wide statistical artifact, not growth. The same mechanism double-counts enrolments: the YTD measure counts both the legacy and the new Adelaide University enrolment for every transferred student.",
   alternates: { canonical: "/intelligence/sa-commencement-anomaly" },
 };
 
@@ -26,6 +26,30 @@ const intFmt = new Intl.NumberFormat("en-AU");
 const RESEARCH_BY_YEAR = [
   { y: 2019, v: 66 }, { y: 2020, v: 72 }, { y: 2021, v: 47 }, { y: 2022, v: 140 },
   { y: 2023, v: 115 }, { y: 2024, v: 152 }, { y: 2025, v: 143 }, { y: 2026, v: 1466 },
+];
+
+// SA Higher Education RESEARCH ENROLMENTS (Doctoral + Masters by Research),
+// February YTD, by year. The 2026 figure double-counts transferred students:
+// the YTD measure counts every enrolment active in the window, and merger
+// students had both a legacy CoE and a new Adelaide University CoE.
+const RESEARCH_ENR_BY_YEAR = [
+  { y: 2019, v: 833 }, { y: 2020, v: 855 }, { y: 2021, v: 742 }, { y: 2022, v: 841 },
+  { y: 2023, v: 1001 }, { y: 2024, v: 1229 }, { y: 2025, v: 1424 }, { y: 2026, v: 3021 },
+];
+
+// SA research enrolments by broad field of education, Feb YTD. The merger CoEs
+// were issued under a generic "Mixed Field Programmes" CRICOS classification;
+// every genuine discipline is roughly flat. "Other fields" = Architecture &
+// Building, Education, Agriculture, Creative Arts, Dual Qualification.
+const ENR_BY_FIELD = [
+  { field: "Mixed Field Programmes", e25: 12, e26: 1403 },
+  { field: "Engineering & Related Tech", e25: 392, e26: 409 },
+  { field: "Society & Culture", e25: 187, e26: 324 },
+  { field: "Natural & Physical Sciences", e25: 295, e26: 302 },
+  { field: "Health", e25: 210, e26: 252 },
+  { field: "Information Technology", e25: 122, e26: 120 },
+  { field: "Management & Commerce", e25: 107, e26: 99 },
+  { field: "Other fields", e25: 99, e26: 112 },
 ];
 
 // SA Higher Education commencements by level of study, Feb YTD, split into
@@ -53,19 +77,21 @@ const RESEARCH_VISAS = [
   { fy: "2022-23", v: 1033 }, { fy: "2023-24", v: 717 }, { fy: "2024-25", v: 839 },
 ];
 
-// ---- Chart 1: vertical bars, research commencements by year ----------------
-function ResearchSpikeChart() {
+// ---- Chart 1: vertical bars, a yearly series with the 2026 bar highlighted --
+function YearSpikeChart({ data, yLabel, ariaLabel }: {
+  data: { y: number; v: number }[]; yLabel: string; ariaLabel: string;
+}) {
   const W = 760, H = 380, M = { top: 24, right: 24, bottom: 44, left: 56 };
   const iw = W - M.left - M.right, ih = H - M.top - M.bottom;
-  const max = Math.max(...RESEARCH_BY_YEAR.map((d) => d.v));
-  const n = RESEARCH_BY_YEAR.length;
+  const max = Math.max(...data.map((d) => d.v));
+  const n = data.length;
   const band = iw / n;
   const barW = Math.min(band * 0.62, 56);
   const yOf = (v: number) => M.top + ih - (v / max) * ih;
   const ticks = [0, 0.25, 0.5, 0.75, 1].map((f) => Math.round(max * f));
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="mx-auto block w-full" role="img"
-      aria-label="South Australian international research commencements by year">
+      aria-label={ariaLabel}>
       <rect x="0" y="0" width={W} height={H} fill="#ffffff" />
       {ticks.map((t, i) => (
         <g key={i}>
@@ -75,7 +101,7 @@ function ResearchSpikeChart() {
           </text>
         </g>
       ))}
-      {RESEARCH_BY_YEAR.map((d, i) => {
+      {data.map((d, i) => {
         const cx = M.left + (i + 0.5) * band;
         const y = yOf(d.v);
         const isCur = d.y === 2026;
@@ -94,7 +120,7 @@ function ResearchSpikeChart() {
         );
       })}
       <text transform={`translate(16, ${M.top + ih / 2}) rotate(-90)`} textAnchor="middle"
-        fontSize="11" fontWeight="600" fill={NAVY} fillOpacity="0.6">Commencements (Feb YTD)</text>
+        fontSize="11" fontWeight="600" fill={NAVY} fillOpacity="0.6">{yLabel}</text>
       <text x={W - M.right} y={H - 6} textAnchor="end" fontSize="9" fill={NAVY} fillOpacity="0.5">
         magincia.ai · Source: Dept of Education
       </text>
@@ -279,10 +305,12 @@ export default function SaCommencementAnomalyPage() {
         moment genuine new-student arrivals were falling.
       </p>
 
-      <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3">
         <Stat value="+925%" label="SA international research commencements, Feb 2025 → Feb 2026" accent={VERM} />
         <Stat value="90%" label="of the surge are students already in Australia (not new arrivals)" />
         <Stat value="12.5×" label="Doctoral commencements alone (108 → 1,349)" accent={VERM} />
+        <Stat value="2.1×" label="Research enrolments also doubled (1,424 → 3,021) — the same students counted twice" accent={VERM} />
+        <Stat value="117×" label="'Mixed Field Programmes' enrolments (12 → 1,403) — where the new merger CoEs sit" />
         <Stat value="~840" label="SA research student visas granted in the latest year — essentially flat" accent={BLUE} />
       </div>
 
@@ -299,8 +327,41 @@ export default function SaCommencementAnomalyPage() {
       <ChartCard
         title="SA international research commencements, February YTD"
         sub="Doctoral + Masters by Research. The 2026 bar is the merger artifact, not organic growth.">
-        <ResearchSpikeChart />
+        <YearSpikeChart data={RESEARCH_BY_YEAR} yLabel="Commencements (Feb YTD)"
+          ariaLabel="South Australian international research commencements by year" />
       </ChartCard>
+
+      <h2 className="mt-12 max-w-3xl text-2xl font-semibold tracking-tight text-navy">
+        What the official methodology says
+      </h2>
+      <p className="mt-3 max-w-3xl text-navy/80 leading-relaxed">
+        The Department does not flag the merger anywhere in the release, but its own counting rules predict exactly
+        this outcome. From the{" "}
+        <a className="text-vermillion hover:underline"
+          href="https://www.education.gov.au/international-education-data-and-research/explanatory-notes-data-relating-international-students-studying-australia">
+          explanatory notes
+        </a>{" "}
+        and the{" "}
+        <a className="text-vermillion hover:underline"
+          href="https://www.education.gov.au/international-education-data-and-research/international-student-monthly-summary-and-data-tables">
+          monthly data-tables page
+        </a>:
+      </p>
+      <blockquote className="mt-4 max-w-3xl rounded-xl border-l-4 border-vermillion/60 bg-white/60 p-4 text-navy/80">
+        <p className="text-sm leading-relaxed">
+          &ldquo;A commencement is an enrolment that commenced at any time within the year it appears in.&rdquo;
+        </p>
+        <p className="mt-2 text-sm leading-relaxed">
+          &ldquo;Enrolment numbers is a count of a student&rsquo;s enrolment within the reference period. If a
+          student does multiple courses during the reference period, the enrolments will each be counted.&rdquo;
+        </p>
+      </blockquote>
+      <p className="mt-3 max-w-3xl text-navy/80 leading-relaxed">
+        The data is built from Confirmations of Enrolment (CoEs) in PRISMS, not from people. Transferring ~56,000
+        continuing students to a new CRICOS provider on 1 January issued each of them a <em>new CoE</em>: a new CoE
+        starting in 2026 is, by definition, a commencement — and because the legacy CoE was also active at the start
+        of the year, <em>both</em> enrolments fall inside the year-to-date window and are each counted.
+      </p>
 
       <h2 className="mt-12 max-w-3xl text-2xl font-semibold tracking-tight text-navy">It isn&rsquo;t new students</h2>
       <p className="mt-3 max-w-3xl text-navy/80 leading-relaxed">
@@ -364,6 +425,78 @@ export default function SaCommencementAnomalyPage() {
         Continuing = already in Australia (new_to_australia = No); new arrivals = new_to_australia = Yes.
         South Australia, Higher Education, February year-to-date. Counts under 5 are perturbed per the
         de-identification rule.
+      </p>
+
+      <h2 className="mt-12 max-w-3xl text-2xl font-semibold tracking-tight text-navy">
+        The enrolments doubled too — the same students, counted twice
+      </h2>
+      <p className="mt-3 max-w-3xl text-navy/80 leading-relaxed">
+        A fair objection to the programme-change explanation: if the surge were just continuing students being
+        re-badged, the <em>enrolment</em> count should be stable. It is not. SA research enrolments jumped from{" "}
+        <strong>1,424 to 3,021</strong> (doctoral alone: 1,312 → 2,713) — a clean doubling. That is not a second
+        mystery; it is the second face of the same artifact. Under the counting rule above, a transferred student
+        carries <em>two</em> enrolments through the early-2026 window — the legacy one and the new Adelaide
+        University one — and &ldquo;the enrolments will each be counted.&rdquo;
+      </p>
+
+      <ChartCard
+        title="SA international research enrolments, February YTD"
+        sub="The 2026 figure counts most of the continuing cohort twice. The real cohort is ~1,500–1,700.">
+        <YearSpikeChart data={RESEARCH_ENR_BY_YEAR} yLabel="Enrolments (Feb YTD)"
+          ariaLabel="South Australian international research enrolments by year" />
+      </ChartCard>
+
+      <p className="mt-6 max-w-3xl text-navy/80 leading-relaxed">
+        The field-of-education split is decisive. The new Adelaide University CoEs were registered under a generic{" "}
+        <strong>&ldquo;Mixed Field Programmes&rdquo;</strong> classification — and that single label absorbs the
+        entire increase, exploding from 12 to 1,403, while every genuine discipline is flat. The legacy enrolments
+        (real fields, ~1,600) plus the new ones (mixed field, ~1,400) are the same cohort listed twice.
+      </p>
+
+      <div className="mt-6 overflow-x-auto">
+        <table className="w-full min-w-[30rem] border-collapse text-sm">
+          <thead>
+            <tr className="border-b border-navy/15 text-left text-navy/60">
+              <th className="py-2 pr-3 font-semibold">Broad field of education</th>
+              <th className="py-2 px-3 text-right font-semibold">Feb 2025</th>
+              <th className="py-2 px-3 text-right font-semibold">Feb 2026</th>
+              <th className="py-2 pl-3 text-right font-semibold">Ratio</th>
+            </tr>
+          </thead>
+          <tbody>
+            {ENR_BY_FIELD.map((r) => {
+              const isMixed = r.field === "Mixed Field Programmes";
+              return (
+                <tr key={r.field} className="border-b border-navy/5">
+                  <td className="py-2 pr-3 font-medium" style={{ color: isMixed ? VERM : NAVY }}>
+                    {r.field}
+                  </td>
+                  <td className="py-2 px-3 text-right tabular-nums text-navy/85">{intFmt.format(r.e25)}</td>
+                  <td className="py-2 px-3 text-right tabular-nums"
+                    style={{ color: isMixed ? VERM : NAVY, fontWeight: isMixed ? 700 : 400 }}>
+                    {intFmt.format(r.e26)}
+                  </td>
+                  <td className="py-2 pl-3 text-right tabular-nums"
+                    style={{ color: isMixed ? VERM : NAVY, fontWeight: isMixed ? 700 : 400 }}>
+                    {isMixed ? "117×" : `${(r.e26 / r.e25).toFixed(2)}×`}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+      <p className="mt-2 max-w-3xl text-xs text-navy/55">
+        SA research (Doctoral + Masters by Research) enrolments, February YTD. The new Adelaide University CoEs sit
+        in &ldquo;Mixed Field Programmes&rdquo;; legacy CoEs retain their real field.
+      </p>
+
+      <p className="mt-6 max-w-3xl text-navy/80 leading-relaxed">
+        Two corroborations. First, every major nationality doubled <em>uniformly</em> — China 2.28×, India 2.31×,
+        Iran 2.09×, Bangladesh 2.41×, Sri Lanka 2.03×, Vietnam 2.00×. Real demand shifts never replicate the
+        existing stock at a constant multiple; duplication does. Second, continuing-student enrolments went
+        1,354 → 2,878 (2.13×) while genuinely new arrivals went 70 → 143 — the doubling sits entirely on the
+        cohort that was transferred.
       </p>
 
       <h2 className="mt-12 max-w-3xl text-2xl font-semibold tracking-tight text-navy">The visa cross-check</h2>
@@ -471,11 +604,22 @@ export default function SaCommencementAnomalyPage() {
 
       <h2 className="mt-12 max-w-3xl text-2xl font-semibold tracking-tight text-navy">The takeaway</h2>
       <p className="mt-3 max-w-3xl text-navy/80 leading-relaxed">
-        Any year-on-year read of South Australian international commencements across the 2025→2026 boundary — at{" "}
-        <em>any</em> level — is a structural break, not a trend. To recover the real new-student signal, filter to
-        new arrivals (<code className="rounded bg-navy/5 px-1 text-sm">new_to_australia = Yes</code>); on that basis
-        South Australia&rsquo;s new international students fell, in line with the national decline and tighter visa
+        Any year-on-year read of South Australian international <em>commencements or enrolments</em> across the
+        2025→2026 boundary — at <em>any</em> level — is a structural break, not a trend. Commencements are inflated
+        because re-issued CoEs count as new starts; enrolments are inflated because the same student carries two
+        countable enrolments through the window. To recover the real new-student signal, filter to new arrivals
+        (<code className="rounded bg-navy/5 px-1 text-sm">new_to_australia = Yes</code>); on that basis South
+        Australia&rsquo;s new international students fell, in line with the national decline and tighter visa
         settings. Research is simply where the distortion is impossible to miss.
+      </p>
+      <p className="mt-3 max-w-3xl text-navy/80 leading-relaxed">
+        <strong>What to watch.</strong> The December 2026 YTD release will still carry the double-count (both
+        enrolments were active during 2026). Expect the series to snap back to roughly 1,500–1,700 research
+        enrolments at <strong>February 2027</strong>, once only the Adelaide University CoE remains — and for
+        &ldquo;Mixed Field Programmes&rdquo; to linger as SA&rsquo;s dominant research field label until the CRICOS
+        coding is corrected. The clean arbiter will be the federal <em>student load</em> (EFTSL) release for 2026:
+        study load does not double when a student is re-enrolled, so flat overseas EFTSL will confirm the artifact
+        beyond argument.
       </p>
 
       <footer className="mt-12 border-t border-navy/10 pt-6 text-sm text-navy/60">
@@ -484,7 +628,11 @@ export default function SaCommencementAnomalyPage() {
           Australian Department of Education &ldquo;February 2026 — Latest Data&rdquo; international-student release
           (Higher Education sector, South Australia, February year-to-date), cross-referenced with Department of
           Home Affairs student-visa grant data. &ldquo;Research&rdquo; = Doctoral Degree + Masters Degree
-          (Research). Counts below 5 are perturbed to &ldquo;&lt;5&rdquo; under the de-identification rule; none
+          (Research). Counting definitions quoted from the Department&rsquo;s{" "}
+          <a className="text-vermillion hover:underline"
+            href="https://www.education.gov.au/international-education-data-and-research/explanatory-notes-data-relating-international-students-studying-australia">
+            explanatory notes for data relating to international students studying in Australia
+          </a>. Counts below 5 are perturbed to &ldquo;&lt;5&rdquo; under the de-identification rule; none
           occur at the grain shown. Every figure is traceable to its source file via the magincia lineage layer.
         </p>
         <p className="mt-3 font-semibold text-vermillion">magincia.ai</p>

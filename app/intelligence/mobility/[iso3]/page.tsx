@@ -32,6 +32,7 @@ export async function generateMetadata({
   params: Promise<{ iso3: string }>;
 }): Promise<Metadata> {
   const { iso3 } = await params;
+  if (!/^[a-z]{3}$/i.test(iso3)) return {};
   const report = await getCountryReport(iso3).catch(() => null);
   if (!report) return {};
   const name = report.country.name;
@@ -181,6 +182,9 @@ export default async function MobilityCountryPage({
   params: Promise<{ iso3: string }>;
 }) {
   const { iso3 } = await params;
+  // Only three-letter codes can be countries — reject anything else before it
+  // reaches the DB, so junk paths can't spin up queries or ISR cache entries.
+  if (!/^[a-z]{3}$/i.test(iso3)) notFound();
   let report: CountryReport | null = null;
   let auNationality: string | null = null;
   let indexSeries: IndexPoint[] = [];

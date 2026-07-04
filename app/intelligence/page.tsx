@@ -71,7 +71,7 @@ export default function IntelligenceHub() {
           <Link
             key={s.href}
             href={s.href}
-            className="group flex flex-col rounded-2xl border border-navy/10 bg-white/70 p-6 transition-colors hover:border-vermillion/40"
+            className="group card-elevated flex flex-col rounded-2xl p-6"
           >
             <span
               className={`text-xs font-semibold uppercase tracking-widest ${

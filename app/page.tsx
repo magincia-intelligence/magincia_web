@@ -20,15 +20,15 @@ export default function Home() {
           width={1983}
           height={793}
           priority
-          className="w-full max-w-5xl h-auto"
+          className="w-full min-w-0 max-w-5xl h-auto"
         />
       </section>
 
-      <section className="w-full flex flex-col items-center px-6 pt-6 text-center">
-        <h1 className="max-w-2xl text-lg sm:text-xl text-navy/80 font-normal">
+      <section className="w-full flex flex-col items-center px-6 pt-8 text-center">
+        <h1 className="max-w-2xl text-xl sm:text-2xl text-navy font-normal leading-snug tracking-tight">
           AI-powered intelligence on Australian domestic and international education
         </h1>
-        <span className="mt-4 inline-flex items-center rounded-full bg-vermillion px-3 py-1 text-xs font-semibold uppercase tracking-widest text-cream">
+        <span className="mt-5 inline-flex items-center rounded-full border border-vermillion/25 bg-vermillion/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.15em] text-vermillion">
           Beta
         </span>
         <SearchBox />

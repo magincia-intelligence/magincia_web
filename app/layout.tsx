@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Outfit, Hanken_Grotesk } from "next/font/google";
 import "./globals.css";
 import SiteHeader from "./components/SiteHeader";
+import { jsonLd } from "@/lib/seo";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -84,7 +85,7 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify([
+            __html: jsonLd([
               {
                 "@context": "https://schema.org",
                 "@type": "Organization",
@@ -111,6 +112,17 @@ export default function RootLayout({
                 url: "https://magincia.ai",
                 inLanguage: "en-AU",
                 publisher: { "@type": "Organization", name: SITE_NAME },
+                // Sitelinks search box: lets Google surface the site's own
+                // search directly in results.
+                potentialAction: {
+                  "@type": "SearchAction",
+                  target: {
+                    "@type": "EntryPoint",
+                    urlTemplate:
+                      "https://magincia.ai/search?q={search_term_string}",
+                  },
+                  "query-input": "required name=search_term_string",
+                },
               },
             ]),
           }}

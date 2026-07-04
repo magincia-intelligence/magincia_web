@@ -9,6 +9,7 @@ import {
   parseBrief,
 } from "@/lib/briefs";
 import BriefBody from "./BriefBody";
+import { breadcrumbLd, jsonLd } from "@/lib/seo";
 
 export const dynamicParams = false;
 
@@ -97,6 +98,8 @@ export default async function BriefPage({
     url: `https://magincia.ai/briefs/${meta.date}`,
     image: "https://magincia.ai/magincia_banner.png",
     articleSection: "Australian education",
+    // Base keywords plus the story tags actually present in this brief, so each
+    // day's structured data reflects that day's topics.
     keywords: [
       "Australian education",
       "international education in Australia",
@@ -106,6 +109,7 @@ export default async function BriefPage({
       "ASQA",
       "ELICOS",
       "VET",
+      ...tags,
     ].join(", "),
     author: { "@type": "Organization", name: "Magincia Intelligence" },
     publisher: {
@@ -118,11 +122,17 @@ export default async function BriefPage({
     },
   };
 
+  const breadcrumb = breadcrumbLd([
+    { name: "Home", path: "/" },
+    { name: "Archive", path: "/archive" },
+    { name: longDate, path: `/briefs/${meta.date}` },
+  ]);
+
   return (
     <main className="w-full max-w-3xl mx-auto px-6 sm:px-8 lg:px-10 py-16">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(newsArticleJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLd([newsArticleJsonLd, breadcrumb]) }}
       />
       <Link
         href="/"

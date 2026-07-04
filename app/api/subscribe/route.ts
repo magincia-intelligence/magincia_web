@@ -1,8 +1,15 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { signToken } from "@/lib/subscribe-token";
+import { clientIp, rateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
+
+// Cap confirmation-email sends per IP so the endpoint can't be used to spam
+// arbitrary inboxes (or run up the Resend bill). 5 per 10 minutes is generous
+// for a real subscriber, hostile to abuse.
+const RATE_LIMIT = 5;
+const RATE_WINDOW_SEC = 600;
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const FROM = "Magincia Intelligence <daily@magincia.ai>";
@@ -41,6 +48,18 @@ This link expires in 48 hours. If you didn't request this, ignore this email —
 }
 
 export async function POST(req: Request) {
+  const { ok, retryAfterSec } = rateLimit(
+    `subscribe:${clientIp(req)}`,
+    RATE_LIMIT,
+    RATE_WINDOW_SEC,
+  );
+  if (!ok) {
+    return NextResponse.json(
+      { ok: false, error: "Too many requests. Please try again in a little while." },
+      { status: 429, headers: { "Retry-After": String(retryAfterSec) } },
+    );
+  }
+
   let body: SubscribeBody = {};
   try {
     body = (await req.json()) as SubscribeBody;

@@ -21,6 +21,11 @@ export interface Brief {
 }
 
 function readBrief(date: string): Brief | null {
+  // Defence-in-depth: never let a route param reach the filesystem path unless
+  // it is exactly an ISO date. (Both brief/archive pages pin dynamicParams=false
+  // today, so only pre-generated dates are served — this guards against a future
+  // flag flip re-opening path traversal via `date`.)
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
   const file = path.join(BRIEFS_DIR, `${date}.md`);
   if (!fs.existsSync(file)) return null;
   const { data, content } = matter(fs.readFileSync(file, "utf8"));

@@ -21,14 +21,62 @@
   --font-body: var(--font-hanken);
 }
 
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-body), system-ui, sans-serif;
+  /* Even paragraph rag — no orphaned last-word lines. */
+  text-wrap: pretty;
 }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display), system-ui, sans-serif;
+  /* Optical tightening on display type — the Apple hallmark. */
+  letter-spacing: -0.02em;
+  /* Keep headline line breaks balanced rather than ragged. */
+  text-wrap: balance;
+}
+
+/* Quiet, on-brand text selection instead of the browser default blue. */
+::selection {
+  background: color-mix(in srgb, var(--brand-vermillion) 22%, transparent);
+  color: var(--brand-navy);
+}
+
+/* Soft, consistent focus ring for keyboard users across the site. */
+:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--brand-blue) 65%, transparent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Subtle elevation utility — replaces hard hairline borders on cards with the
+   soft, low-contrast shadow Apple uses to separate surfaces from the page. */
+.card-elevated {
+  background: color-mix(in srgb, #ffffff 72%, var(--brand-cream));
+  border: 1px solid color-mix(in srgb, var(--brand-navy) 6%, transparent);
+  box-shadow:
+    0 1px 2px color-mix(in srgb, var(--brand-navy) 5%, transparent),
+    0 8px 24px -12px color-mix(in srgb, var(--brand-navy) 14%, transparent);
+  transition: box-shadow 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
+}
+.card-elevated:hover {
+  border-color: color-mix(in srgb, var(--brand-vermillion) 30%, transparent);
+  box-shadow:
+    0 1px 2px color-mix(in srgb, var(--brand-navy) 6%, transparent),
+    0 16px 40px -16px color-mix(in srgb, var(--brand-navy) 22%, transparent);
+  transform: translateY(-2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .card-elevated, .card-elevated:hover { transition: none; transform: none; }
 }
 
 /* Brief article styling: brand-coloured links, navy headings in display font. */

@@ -294,7 +294,7 @@ export default function EnrolmentsExplorer({
     <div className="mt-8 space-y-6">
     {/* Global filters — apply across the whole page */}
     <div className="sticky top-0 z-20 rounded-xl border border-navy/10 bg-cream/95 p-4 backdrop-blur sm:p-5">
-      <div className="flex flex-wrap items-end gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
         <div className="grid flex-1 grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           <Select label="Sector" value={sector} options={options.sectors} onChange={setSector} />
           <Select label="Region" value={region} options={options.regions}

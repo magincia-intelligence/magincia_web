@@ -4,7 +4,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "The South Australian Commencement Anomaly — How a University Merger Inflated a Statistic",
   description:
-    "A February 2026 case study: international Higher Degree by Research commencements in South Australia jumped roughly tenfold while genuine new-student arrivals fell. The cause is the Adelaide University merger re-commencing continuing students — a system-wide statistical artifact, not growth. The same mechanism double-counts enrolments: the YTD measure counts both the legacy and the new Adelaide University enrolment for every transferred student.",
+    "A February 2026 case study: international Higher Degree by Research commencements in South Australia jumped roughly tenfold while genuine new-student arrivals fell. This appears to be a statistical artifact of the Adelaide University merger re-commencing continuing students, rather than growth. On the same reasoning, transferred students carrying both a legacy and a new Adelaide University enrolment would lift the year-to-date count. Magincia is confirming the treatment with the Department.",
   alternates: { canonical: "/intelligence/sa-commencement-anomaly" },
 };
 
@@ -29,9 +29,10 @@ const RESEARCH_BY_YEAR = [
 ];
 
 // SA Higher Education RESEARCH ENROLMENTS (Doctoral + Masters by Research),
-// February YTD, by year. The 2026 figure double-counts transferred students:
-// the YTD measure counts every enrolment active in the window, and merger
-// students had both a legacy CoE and a new Adelaide University CoE.
+// February YTD, by year. The 2026 figure appears to include transferred students
+// twice: the YTD measure counts every enrolment active in the window, and merger
+// students likely held both a legacy CoE and a new Adelaide University CoE
+// (treatment being confirmed with the Department).
 const RESEARCH_ENR_BY_YEAR = [
   { y: 2019, v: 833 }, { y: 2020, v: 855 }, { y: 2021, v: 742 }, { y: 2022, v: 841 },
   { y: 2023, v: 1001 }, { y: 2024, v: 1229 }, { y: 2025, v: 1424 }, { y: 2026, v: 3021 },
@@ -301,15 +302,25 @@ export default function SaCommencementAnomalyPage() {
       <p className="mt-4 max-w-3xl text-lg text-navy/80 leading-snug">
         International <strong>Higher Degree by Research</strong> commencements in South Australia jumped roughly
         tenfold in February 2026 — from 143 to 1,466. On the surface it looks like an extraordinary recruitment
-        win. It is the opposite: a statistical artifact of the Adelaide University merger, recorded at the very
-        moment genuine new-student arrivals were falling.
+        win. It appears to be the opposite: most likely a statistical artifact of the Adelaide University merger,
+        recorded at the very moment genuine new-student arrivals were falling.
       </p>
+
+      <div className="mt-8 max-w-3xl rounded-xl border-l-4 border-navy/40 bg-white/60 p-4">
+        <p className="text-sm leading-relaxed text-navy/80">
+          <strong className="text-navy">A note on interpretation.</strong> The mechanism described here — that the
+          merger&rsquo;s re-issued enrolments are counted alongside the legacy ones — is Magincia&rsquo;s
+          assessment, drawn from the published data and the Department&rsquo;s own counting rules. We are
+          confirming the exact treatment with the Department of Education and will update this analysis if their
+          guidance differs.
+        </p>
+      </div>
 
       <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3">
         <Stat value="+925%" label="SA international research commencements, Feb 2025 → Feb 2026" accent={VERM} />
         <Stat value="90%" label="of the surge are students already in Australia (not new arrivals)" />
         <Stat value="12.5×" label="Doctoral commencements alone (108 → 1,349)" accent={VERM} />
-        <Stat value="2.1×" label="Research enrolments also doubled (1,424 → 3,021) — the same students counted twice" accent={VERM} />
+        <Stat value="2.1×" label="Research enrolments also doubled (1,424 → 3,021) — moving in lockstep with the commencement spike" accent={VERM} />
         <Stat value="117×" label="'Mixed Field Programmes' enrolments (12 → 1,403) — where the new merger CoEs sit" />
         <Stat value="~840" label="SA research student visas granted in the latest year — essentially flat" accent={BLUE} />
       </div>
@@ -360,7 +371,8 @@ export default function SaCommencementAnomalyPage() {
         The data is built from Confirmations of Enrolment (CoEs) in PRISMS, not from people. Transferring ~56,000
         continuing students to a new CRICOS provider on 1 January issued each of them a <em>new CoE</em>: a new CoE
         starting in 2026 is, by definition, a commencement — and because the legacy CoE was also active at the start
-        of the year, <em>both</em> enrolments fall inside the year-to-date window and are each counted.
+        of the year, <em>both</em> enrolments would fall inside the year-to-date window and, on our reading of the
+        counting rule, each be counted.
       </p>
 
       <h2 className="mt-12 max-w-3xl text-2xl font-semibold tracking-tight text-navy">It isn&rsquo;t new students</h2>
@@ -428,15 +440,16 @@ export default function SaCommencementAnomalyPage() {
       </p>
 
       <h2 className="mt-12 max-w-3xl text-2xl font-semibold tracking-tight text-navy">
-        The enrolments doubled too — the same students, counted twice
+        The enrolments doubled too — in lockstep with the commencements
       </h2>
       <p className="mt-3 max-w-3xl text-navy/80 leading-relaxed">
         A fair objection to the programme-change explanation: if the surge were just continuing students being
         re-badged, the <em>enrolment</em> count should be stable. It is not. SA research enrolments jumped from{" "}
         <strong>1,424 to 3,021</strong> (doctoral alone: 1,312 → 2,713) — a clean doubling. That is not a second
-        mystery; it is the second face of the same artifact. Under the counting rule above, a transferred student
-        carries <em>two</em> enrolments through the early-2026 window — the legacy one and the new Adelaide
-        University one — and &ldquo;the enrolments will each be counted.&rdquo;
+        mystery; it appears to be the same effect seen from the enrolment side. On our reading of the counting rule
+        above, a transferred student would carry <em>two</em> enrolments through the early-2026 window — the legacy
+        one and the new Adelaide University one — which, under the rule that &ldquo;the enrolments will each be
+        counted,&rdquo; would both land in the total. We are confirming this treatment with the Department.
       </p>
 
       <ChartCard
@@ -605,15 +618,16 @@ export default function SaCommencementAnomalyPage() {
       <h2 className="mt-12 max-w-3xl text-2xl font-semibold tracking-tight text-navy">The takeaway</h2>
       <p className="mt-3 max-w-3xl text-navy/80 leading-relaxed">
         Any year-on-year read of South Australian international <em>commencements or enrolments</em> across the
-        2025→2026 boundary — at <em>any</em> level — is a structural break, not a trend. Commencements are inflated
-        because re-issued CoEs count as new starts; enrolments are inflated because the same student carries two
-        countable enrolments through the window. To recover the real new-student signal, filter to new arrivals
+        2025→2026 boundary — at <em>any</em> level — is best treated as a structural break rather than a trend.
+        Commencements appear inflated because re-issued CoEs register as new starts; enrolments appear inflated
+        because a transferred student would carry two countable enrolments through the window. To recover the real
+        new-student signal, filter to new arrivals
         (<code className="rounded bg-navy/5 px-1 text-sm">new_to_australia = Yes</code>); on that basis South
         Australia&rsquo;s new international students fell, in line with the national decline and tighter visa
         settings. Research is simply where the distortion is impossible to miss.
       </p>
       <p className="mt-3 max-w-3xl text-navy/80 leading-relaxed">
-        <strong>What to watch.</strong> The December 2026 YTD release will still carry the double-count (both
+        <strong>What to watch.</strong> The December 2026 YTD release will still carry this effect (both
         enrolments were active during 2026). Expect the series to snap back to roughly 1,500–1,700 research
         enrolments at <strong>February 2027</strong>, once only the Adelaide University CoE remains — and for
         &ldquo;Mixed Field Programmes&rdquo; to linger as SA&rsquo;s dominant research field label until the CRICOS

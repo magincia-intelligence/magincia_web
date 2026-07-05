@@ -74,7 +74,7 @@ const REPORTS: Report[] = [
     kind: "Case Study",
     date: "12 Jun 2026",
     title: "The South Australian commencement anomaly",
-    dek: "How the Adelaide University merger inflated a statistic — research commencements jumped tenfold while genuine new arrivals fell.",
+    dek: "Why the Adelaide University merger makes the year-on-year figures hard to compare — research commencements jumped tenfold while genuine new arrivals fell.",
   },
 ];
 

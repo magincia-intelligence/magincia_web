@@ -4,7 +4,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Australia's international student boom has turned — May 2026 data",
   description:
-    "The Department of Education's May 2026 release is the first year-on-year decline of the post-pandemic era: international enrolments fell 7.6% and commencements 8.0%. The contraction is concentrated in VET and ELICOS and in the pathway source markets, while Higher Education's apparent resilience is flattered by the Adelaide University merger double-count.",
+    "The Department of Education's May 2026 release is the first year-on-year decline of the post-pandemic era: international enrolments fell 7.6% and commencements 8.0%. The contraction is concentrated in VET and ELICOS and in the pathway source markets, while Higher Education's apparent resilience is likely affected by a comparability break from the Adelaide University merger.",
   alternates: { canonical: "/intelligence/international-education-may-2026" },
 };
 
@@ -115,14 +115,17 @@ function YearBars({ data, yLabel, ariaLabel, peakYear }: {
 }
 
 // ---- Chart: horizontal diverging YoY% bars (sectors / states) --------------
+// The bar carries direction + magnitude off a central zero line; the numeric
+// value lives in a fixed right-hand column so it can never overlap the category
+// labels, however long the bar. The left column carries label + optional sub.
 function DivergingBars({ rows, ariaLabel, note }: {
   rows: { label: string; yoy: number; sub?: string }[]; ariaLabel: string; note: string;
 }) {
   const sorted = [...rows].sort((a, b) => b.yoy - a.yoy);
-  const W = 760, rowH = 40, M = { top: 16, right: 70, bottom: 26, left: 132 };
+  const W = 760, rowH = 42, M = { top: 16, right: 66, bottom: 28, left: 150 };
   const H = M.top + sorted.length * rowH + M.bottom;
   const iw = W - M.left - M.right;
-  const maxAbs = Math.max(...sorted.map((r) => Math.abs(r.yoy))) * 1.1;
+  const maxAbs = Math.max(...sorted.map((r) => Math.abs(r.yoy))) * 1.15;
   const xOf = (v: number) => M.left + (iw * (v + maxAbs)) / (2 * maxAbs);
   const zero = xOf(0);
   return (
@@ -131,27 +134,28 @@ function DivergingBars({ rows, ariaLabel, note }: {
       <line x1={zero} x2={zero} y1={M.top} y2={M.top + sorted.length * rowH} stroke={NAVY} strokeOpacity="0.25" />
       {sorted.map((r, i) => {
         const top = M.top + i * rowH;
+        const mid = top + rowH / 2;
         const pos = r.yoy >= 0;
         const x0 = pos ? zero : xOf(r.yoy);
         const w = Math.abs(xOf(r.yoy) - zero);
         return (
           <g key={r.label}>
-            <text x={M.left - 12} y={top + rowH / 2 + 4} textAnchor="end" fontSize="12"
+            <text x={M.left - 14} y={r.sub ? mid : mid + 4} textAnchor="end" fontSize="12"
               fill={NAVY} fillOpacity="0.85">{r.label}</text>
-            <rect x={x0} y={top + 9} width={w} height={rowH - 18} rx="2"
-              fill={pos ? BLUE : VERM} fillOpacity={pos ? 0.75 : 0.95} />
-            <text x={pos ? xOf(r.yoy) + 7 : xOf(r.yoy) - 7} y={top + rowH / 2 + 4}
-              textAnchor={pos ? "start" : "end"} fontSize="12" fontWeight="700" fill={pos ? BLUE : VERM}>
-              {pct(r.yoy)}
-            </text>
             {r.sub && (
-              <text x={M.left - 12} y={top + rowH / 2 + 16} textAnchor="end" fontSize="9"
+              <text x={M.left - 14} y={mid + 14} textAnchor="end" fontSize="9"
                 fill={NAVY} fillOpacity="0.45">{r.sub}</text>
             )}
+            <rect x={x0} y={top + 10} width={w} height={rowH - 20} rx="2"
+              fill={pos ? BLUE : VERM} fillOpacity={pos ? 0.75 : 0.95} />
+            <text x={W - 12} y={mid + 4} textAnchor="end" fontSize="12" fontWeight="700"
+              fill={pos ? BLUE : VERM}>
+              {pct(r.yoy)}
+            </text>
           </g>
         );
       })}
-      <text x={W - M.right} y={H - 4} textAnchor="end" fontSize="9" fill={NAVY} fillOpacity="0.5">
+      <text x={M.left} y={H - 4} textAnchor="start" fontSize="9" fill={NAVY} fillOpacity="0.5">
         {note}
       </text>
     </svg>
@@ -241,7 +245,8 @@ export default function MayReleaseAnalysisPage() {
         post-pandemic era. International <strong>enrolments</strong> fell to 752,784 &mdash; down 7.6% on a year
         earlier &mdash; and new <strong>commencements</strong> fell 8.0%. The decline is not broad-based: it is
         concentrated in the VET and ELICOS pathway sectors and in the source markets that feed them, while Higher
-        Education&rsquo;s apparent resilience is partly a merger accounting artifact.
+        Education&rsquo;s apparent resilience is likely affected by a comparability break from the Adelaide
+        University merger.
       </p>
 
       <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -309,15 +314,16 @@ export default function MayReleaseAnalysisPage() {
         <p className="text-sm font-semibold uppercase tracking-wide text-vermillion">Read Higher Education with care</p>
         <p className="mt-2 text-sm text-navy/80 leading-relaxed">
           Higher Education is the <em>only</em> sector showing growth, yet every state&rsquo;s total enrolments
-          fell 5&ndash;12%. The reconciliation is the Adelaide University merger, which on 1 January 2026
-          re-issued a new Confirmation of Enrolment to every continuing student &mdash; so a large cohort is
-          counted twice in the year-to-date window. That double-count inflates Higher Education and flatters the
-          national total. Strip it out and Higher Education is flat-to-negative, in line with everything else. We
-          traced this mechanism in detail in the{" "}
+          fell 5&ndash;12%. The likely explanation is a comparability break from the Adelaide University merger:
+          on 1 January 2026 the two legacy universities&rsquo; continuing students moved onto a single new
+          provider, which affects how the 2025 and 2026 figures line up. We are confirming the exact treatment
+          with the Department before drawing firm conclusions. On a like-for-like basis, Higher Education looks
+          closer to flat than to growth &mdash; more in step with the other sectors. We look at the merger&rsquo;s
+          effect on the year-on-year comparison in more detail in the{" "}
           <Link href="/intelligence/sa-commencement-anomaly" className="font-semibold text-vermillion hover:underline">
             South Australian commencement anomaly
           </Link>{" "}
-          case study &mdash; and it means the true national decline is <em>steeper</em> than the headline −7.6%.
+          case study. For now, the sector&rsquo;s small reported gain is best read with caution.
         </p>
       </div>
 
@@ -362,8 +368,9 @@ export default function MayReleaseAnalysisPage() {
         Australia&rsquo;s international education boom, which added a quarter of a million enrolments between 2022
         and 2025, has rolled over. The turn is policy-driven and targeted: the visa-integrity settings of 2024&ndash;25
         were aimed at the pathway end of the market, and that is precisely where the numbers are falling &mdash; ELICOS,
-        VET, and the mid-tier source countries that feed them. Higher Education looks insulated, but that is largely a
-        merger illusion; on a like-for-like basis the whole system is contracting. And because commencements &mdash;
+        VET, and the mid-tier source countries that feed them. Higher Education looks insulated, but that likely
+        reflects a comparability break from the Adelaide University merger rather than genuine strength; on a
+        like-for-like basis the picture is softer. And because commencements &mdash;
         the leading indicator &mdash; are down for a second year and sit 23% below their 2024 peak, the 2026 enrolment
         decline is the beginning of the adjustment, not the end of it.
       </p>

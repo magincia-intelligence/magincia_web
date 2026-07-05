@@ -18,14 +18,6 @@ type Section = {
 
 const SECTIONS: Section[] = [
   {
-    href: "/intelligence/international-education-may-2026",
-    eyebrow: "New · Release Analysis",
-    title: "The boom has turned — May 2026",
-    blurb:
-      "The Department of Education's May 2026 release is the first year-on-year decline of the post-pandemic era: enrolments −7.6%, commencements −8.0%, concentrated in VET and ELICOS. A charted read of what turned and why.",
-    status: "live",
-  },
-  {
     href: "/intelligence/international-education",
     eyebrow: "Live",
     title: "International Education",
@@ -56,6 +48,33 @@ const SECTIONS: Section[] = [
     blurb:
       "Early childhood education and care — participation, provider supply, and workforce across the Australian ECEC sector.",
     status: "soon",
+  },
+];
+
+// Ad-hoc analysis: dated, one-off charted write-ups over a data release, distinct
+// from the evergreen interactive tools above. Newest first.
+type Report = {
+  href: string;
+  kind: string;      // eyebrow: "Release Analysis", "Case Study", …
+  date: string;      // display date, e.g. "5 Jul 2026"
+  title: string;
+  dek: string;       // one-line summary
+};
+
+const REPORTS: Report[] = [
+  {
+    href: "/intelligence/international-education-may-2026",
+    kind: "Release Analysis",
+    date: "5 Jul 2026",
+    title: "The boom has turned — May 2026",
+    dek: "The first year-on-year decline of the post-pandemic era: enrolments −7.6%, commencements −8.0%, concentrated in VET, ELICOS and the pathway source markets.",
+  },
+  {
+    href: "/intelligence/sa-commencement-anomaly",
+    kind: "Case Study",
+    date: "12 Jun 2026",
+    title: "The South Australian commencement anomaly",
+    dek: "How the Adelaide University merger inflated a statistic — research commencements jumped tenfold while genuine new arrivals fell.",
   },
 ];
 
@@ -96,6 +115,39 @@ export default function IntelligenceHub() {
           </Link>
         ))}
       </div>
+
+      <section className="mt-16 sm:mt-20">
+        <h2 className="text-sm font-semibold uppercase tracking-widest text-navy/50">
+          Latest analysis
+        </h2>
+        <p className="mt-2 max-w-3xl text-sm text-navy/60">
+          Dated deep-dives into individual data releases — the story behind the numbers.
+        </p>
+        <ul className="mt-6 divide-y divide-navy/10 border-y border-navy/10">
+          {REPORTS.map((r) => (
+            <li key={r.href}>
+              <Link
+                href={r.href}
+                className="group flex flex-col gap-1 py-5 sm:flex-row sm:items-baseline sm:gap-6"
+              >
+                <div className="flex shrink-0 items-center gap-2 sm:w-52">
+                  <time className="text-sm tabular-nums text-navy/60">{r.date}</time>
+                  <span className="text-xs font-semibold uppercase tracking-widest text-vermillion">
+                    {r.kind}
+                  </span>
+                </div>
+                <div className="flex-1">
+                  <span className="text-lg font-semibold text-navy transition-colors group-hover:text-vermillion">
+                    {r.title}
+                    <span className="ml-1 inline-block transition-transform group-hover:translate-x-0.5">→</span>
+                  </span>
+                  <p className="mt-1 text-sm text-navy/70">{r.dek}</p>
+                </div>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </section>
     </main>
   );
 }

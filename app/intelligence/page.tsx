@@ -18,6 +18,14 @@ type Section = {
 
 const SECTIONS: Section[] = [
   {
+    href: "/intelligence/international-education-may-2026",
+    eyebrow: "New · Release Analysis",
+    title: "The boom has turned — May 2026",
+    blurb:
+      "The Department of Education's May 2026 release is the first year-on-year decline of the post-pandemic era: enrolments −7.6%, commencements −8.0%, concentrated in VET and ELICOS. A charted read of what turned and why.",
+    status: "live",
+  },
+  {
     href: "/intelligence/international-education",
     eyebrow: "Live",
     title: "International Education",

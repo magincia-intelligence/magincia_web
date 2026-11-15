@@ -63,6 +63,13 @@ type Report = {
 
 const REPORTS: Report[] = [
   {
+    href: "/intelligence/international-education-august-2026",
+    kind: "Release Analysis",
+    date: "15 Nov 2026",
+    title: "The second-semester slide — August 2026",
+    dek: "The downturn deepened at the mid-year intake: commencements −11.7%, enrolments −8.8%, Higher Education now in decline — and the offshore university visa grant rate fell from 91% to 80%.",
+  },
+  {
     href: "/intelligence/international-education-may-2026",
     kind: "Release Analysis",
     date: "5 Jul 2026",

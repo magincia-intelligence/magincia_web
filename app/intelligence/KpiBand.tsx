@@ -37,6 +37,7 @@ export default function KpiBand({ filters }: { filters: Filters }) {
     if (filters.nationality && filters.nationality !== "All") params.set("nationality", filters.nationality);
     if (filters.state && filters.state !== "All") params.set("state", filters.state);
     if (filters.providerType && filters.providerType !== "All") params.set("providerType", filters.providerType);
+    if (filters.newToAustralia && filters.newToAustralia !== "All") params.set("newToAustralia", filters.newToAustralia);
     const ctrl = new AbortController();
     fetch(`/api/intelligence/kpis?${params}`, { signal: ctrl.signal })
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))))

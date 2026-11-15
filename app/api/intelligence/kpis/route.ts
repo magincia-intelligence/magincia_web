@@ -13,6 +13,7 @@ export async function GET(request: Request) {
       nationality: searchParams.get("nationality"),
       state: searchParams.get("state"),
       providerType: searchParams.get("providerType"),
+      newToAustralia: searchParams.get("newToAustralia"),
     });
     return NextResponse.json(data, {
       headers: { "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400" },

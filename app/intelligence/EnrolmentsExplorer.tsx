@@ -87,6 +87,7 @@ export default function EnrolmentsExplorer({
   const [nationality, setNationality] = useState("All");
   const [state, setState] = useState("All");
   const [providerType, setProviderType] = useState("All");
+  const [newToAustralia, setNewToAustralia] = useState("All");
   const [measure, setMeasure] = useState<Measure>("enrolments");
   const [view, setView] = useState<View>("compare");
   const initialMonth = initialSeries.length
@@ -108,6 +109,7 @@ export default function EnrolmentsExplorer({
     if (nationality !== "All") params.set("nationality", nationality);
     if (state !== "All") params.set("state", state);
     if (providerType !== "All") params.set("providerType", providerType);
+    if (newToAustralia !== "All") params.set("newToAustralia", newToAustralia);
     const ctrl = new AbortController();
     setLoading(true);
     setError(null);
@@ -117,7 +119,7 @@ export default function EnrolmentsExplorer({
       .catch((e) => { if (e.name !== "AbortError") setError("Couldn’t load data — try again."); })
       .finally(() => setLoading(false));
     return () => ctrl.abort();
-  }, [sector, region, nationality, state, providerType]);
+  }, [sector, region, nationality, state, providerType, newToAustralia]);
 
   const latest = series.length ? series[series.length - 1] : null;
   const yOf = useCallback((v: number, yMax: number) => M.top + innerH - (v / yMax) * innerH, []);
@@ -149,17 +151,19 @@ export default function EnrolmentsExplorer({
     nationality !== "All" ? nationality : "All Source Countries",
     state !== "All" ? state : "All States",
     providerType !== "All" ? providerType : "All Providers",
+    newToAustralia === "Yes" ? "New to Australia" : newToAustralia === "No" ? "Already in Australia" : null,
   ].filter(Boolean).join(" · ");
 
   // Stable filter object shared by every section on the page.
   const moduleFilters = useMemo(
-    () => ({ sector, region, nationality, state, providerType }),
-    [sector, region, nationality, state, providerType],
+    () => ({ sector, region, nationality, state, providerType, newToAustralia }),
+    [sector, region, nationality, state, providerType, newToAustralia],
   );
   const anyFilterSet =
-    sector !== "All" || region !== "All" || nationality !== "All" || state !== "All" || providerType !== "All";
+    sector !== "All" || region !== "All" || nationality !== "All" || state !== "All" || providerType !== "All" ||
+    newToAustralia !== "All";
   const resetFilters = () => {
-    setSector("All"); setRegion("All"); setNationality("All"); setState("All"); setProviderType("All");
+    setSector("All"); setRegion("All"); setNationality("All"); setState("All"); setProviderType("All"); setNewToAustralia("All");
   };
 
   // ===== COMPARE ==========================================================
@@ -295,7 +299,7 @@ export default function EnrolmentsExplorer({
     {/* Global filters — apply across the whole page */}
     <div className="sticky top-0 z-20 rounded-xl border border-navy/10 bg-cream/95 p-4 backdrop-blur sm:p-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
-        <div className="grid flex-1 grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+        <div className="grid flex-1 grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           <Select label="Sector" value={sector} options={options.sectors} onChange={setSector} />
           <Select label="Region" value={region} options={options.regions}
             onChange={(v) => { setRegion(v); if (v !== "All") setNationality("All"); }} />
@@ -303,6 +307,7 @@ export default function EnrolmentsExplorer({
             onChange={(v) => { setNationality(v); if (v !== "All") setRegion("All"); }} />
           <Select label="State" value={state} options={options.states} onChange={setState} />
           <Select label="Provider Type" value={providerType} options={options.providerTypes} onChange={setProviderType} />
+          <Select label="New to Australia" value={newToAustralia} options={options.newToAustralia} onChange={setNewToAustralia} />
         </div>
         <div className="flex items-center gap-2">
           <Toggle value={measure} onChange={setMeasure}
@@ -658,6 +663,7 @@ export default function EnrolmentsExplorer({
         <ComparisonModule title="By State &amp; Territory" dimension="state" measure={measure} filters={moduleFilters} />
         <ComparisonModule title="By Sector" dimension="sector" measure={measure} filters={moduleFilters} />
         <ComparisonModule title="By Provider Type" dimension="provider_type" measure={measure} filters={moduleFilters} />
+        <ComparisonModule title="New to Australia vs Already Here" dimension="new_to_australia" measure={measure} filters={moduleFilters} />
       </div>
     </section>
     </div>

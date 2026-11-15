@@ -14,6 +14,7 @@ export async function GET(request: Request) {
       nationality: searchParams.get("nationality"),
       state: searchParams.get("state"),
       providerType: searchParams.get("providerType"),
+      newToAustralia: searchParams.get("newToAustralia"),
     });
     return NextResponse.json(
       { series },

@@ -4,7 +4,7 @@ import { getBreakdown } from "@/lib/intelligence";
 export const runtime = "nodejs";
 export const revalidate = 3600;
 
-const DIMENSIONS = new Set(["nationality", "state", "sector", "region", "provider_type"]);
+const DIMENSIONS = new Set(["nationality", "state", "sector", "region", "provider_type", "new_to_australia"]);
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -20,6 +20,7 @@ export async function GET(request: Request) {
       nationality: searchParams.get("nationality"),
       state: searchParams.get("state"),
       providerType: searchParams.get("providerType"),
+      newToAustralia: searchParams.get("newToAustralia"),
     });
     return NextResponse.json(data, {
       headers: { "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400" },

@@ -28,6 +28,9 @@ export type Filters = {
   nationality?: string | null;
   state?: string | null;
   providerType?: string | null;
+  // "Yes" = students in their first course in Australia (the new pipeline);
+  // "No" = students already here moving into a further course.
+  newToAustralia?: string | null;
 };
 
 export type SeriesPoint = {
@@ -42,6 +45,7 @@ export type FilterOptions = {
   nationalities: string[];
   states: string[];
   providerTypes: string[];
+  newToAustralia: string[];
 };
 
 // ---- Queries ------------------------------------------------------------
@@ -59,6 +63,7 @@ function buildWhere(f: Filters): { clause: string; params: string[] } {
   add("nationality", f.nationality);
   add("state", f.state);
   add("provider_type", f.providerType);
+  add("new_to_australia", f.newToAustralia);
   return { clause: conds.length ? `where ${conds.join(" and ")}` : "", params };
 }
 
@@ -92,7 +97,7 @@ export type Breakdown = {
 
 const DIM_COL: Record<string, string> = {
   nationality: "nationality", state: "state", sector: "sector", region: "region",
-  provider_type: "provider_type",
+  provider_type: "provider_type", new_to_australia: "new_to_australia",
 };
 const MEASURE_COL: Record<Measure, string> = {
   enrolments: "ytd_enrolments", commencements: "ytd_commencements",
@@ -128,6 +133,7 @@ export async function getBreakdown(
   add("nationality", dimension === "nationality" ? null : filters.nationality);
   add("state", dimension === "state" ? null : filters.state);
   add("provider_type", dimension === "provider_type" ? null : filters.providerType);
+  add("new_to_australia", dimension === "new_to_australia" ? null : filters.newToAustralia);
 
   params.push(monthNum); const pMn = params.length;
   params.push(currentYear); const pCur = params.length;
@@ -176,6 +182,7 @@ export async function getKpis(filters: Filters): Promise<Kpis> {
   add("nationality", filters.nationality);
   add("state", filters.state);
   add("provider_type", filters.providerType);
+  add("new_to_australia", filters.newToAustralia);
   params.push(monthNum); const pMn = params.length;
   params.push(currentYear); const pCur = params.length;
   params.push(previousYear); const pPrev = params.length;
@@ -206,6 +213,7 @@ export async function getKpis(filters: Filters): Promise<Kpis> {
   padd("nationality", filters.nationality);
   padd("state", filters.state);
   padd("provider_type", filters.providerType);
+  padd("new_to_australia", filters.newToAustralia);
   pParams.push(currentYear); const ppCur = pParams.length;
   pParams.push(monthNum); const ppMn = pParams.length;
   const projSql = `
@@ -258,5 +266,5 @@ export async function getFilterOptions(): Promise<FilterOptions> {
     const ia = REGION_ORDER.indexOf(a), ib = REGION_ORDER.indexOf(b);
     return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
   });
-  return { sectors, regions, nationalities, states, providerTypes };
+  return { sectors, regions, nationalities, states, providerTypes, newToAustralia: ["Yes", "No"] };
 }

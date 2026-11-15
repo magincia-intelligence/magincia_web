@@ -12,7 +12,7 @@ export default function ComparisonModule({
   title, dimension, measure, filters, topN, sortable = false, minForGrowth = 0, defaultSort = "volume",
 }: {
   title: string;
-  dimension: "nationality" | "state" | "sector" | "region" | "provider_type";
+  dimension: "nationality" | "state" | "sector" | "region" | "provider_type" | "new_to_australia";
   measure: "enrolments" | "commencements";
   filters: Filters;
   topN?: number;
@@ -32,6 +32,7 @@ export default function ComparisonModule({
     if (filters.nationality && filters.nationality !== "All") params.set("nationality", filters.nationality);
     if (filters.state && filters.state !== "All") params.set("state", filters.state);
     if (filters.providerType && filters.providerType !== "All") params.set("providerType", filters.providerType);
+    if (filters.newToAustralia && filters.newToAustralia !== "All") params.set("newToAustralia", filters.newToAustralia);
     const ctrl = new AbortController();
     setLoading(true);
     fetch(`/api/intelligence/breakdown?${params}`, { signal: ctrl.signal })

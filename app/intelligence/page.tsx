@@ -26,6 +26,14 @@ const SECTIONS: Section[] = [
     status: "live",
   },
   {
+    href: "/intelligence/npl-tracker",
+    eyebrow: "Live",
+    title: "Planning Level Tracker",
+    blurb:
+      "Progress toward the National Planning Level for new international student commencements, with a full-year projection you can adjust.",
+    status: "live",
+  },
+  {
     href: "/intelligence/mobility",
     eyebrow: "Live",
     title: "Mobility Country Reports",
